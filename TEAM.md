@@ -12,7 +12,7 @@
 
 * 1013816 - Zhiyu Wang - zhiywang1@student.unimelb.edu.au - L14790
 * 1087943 - Jianheng Shi - jianheng@student.unimelb.edu.au - JianhengShi
-* Student 3's Student number - Full Name - Student email - Student Github id
+* 1156375 - Si Cheng - s.cheng2@student.unimelb.edu.au - jssche
 
 Replace the lines above with the correct details of members. Delete or add lines as needed.
 
