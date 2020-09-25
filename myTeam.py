@@ -60,7 +60,6 @@ class Agent(CaptureAgent):
         self.out = getOut(gameState, self.red)
   
     def chooseAction(self, gameState):
-        self.my_dots = self.getMyDots(gameState)
         if self.ifCatch(gameState):
             output = self.catch(gameState)
         else:
@@ -68,8 +67,8 @@ class Agent(CaptureAgent):
                 output = self.eatFoodAction(gameState)
             else:
                 if self.ifChase(gameState):
-                    output = self.CapOrHome(gameState)
-                elif (len(self.getDots(gameState)) <= 2) or (gameState.data.timeleft < 150 and gameState.getAgentState(self.index).numCarrying > 0) or (0 < len(self.homeWay(gameState)) <= 5 and gameState.getAgentState(self.index).numCarrying >= 4 and not self.oppoPac(gameState)):
+                    output = self.eatFoodAction(gameState)
+                elif (len(self.getDots(gameState)) <= 2) or (gameState.data.timeleft < 30 and gameState.getAgentState(self.index).numCarrying > 0):
                     output = self.goHome(gameState)
                 else:
                     output = self.eatFoodAction(gameState)
@@ -86,7 +85,7 @@ class Agent(CaptureAgent):
         for i in self.enemyPIndex(gameState):
             a += self.getMazeDistance(gameState.getAgentState(self.index).getPosition(), gameState.getAgentState(i).getPosition())
             b += self.getMazeDistance(gameState.getAgentState(self.anotherIndex(gameState)).getPosition(), gameState.getAgentState(i).getPosition())
-        if a < b:
+        if a < b <2:
             return True
         else:
             return False
@@ -148,6 +147,7 @@ class Agent(CaptureAgent):
             ls2 = ls1[0: 10]
         else:
             ls2 = self.getDots(gameState)
+
         for eat in ls2:
             path = self.aStarSearch(gameState, gameState.getAgentState(self.anotherIndex(gameState)).getPosition(), [eat], self.notGo(gameState))
             if path is None:
@@ -156,8 +156,10 @@ class Agent(CaptureAgent):
         if len(dic4) != 0:
             out2 = sorted(dic4.items(), key=operator.itemgetter(1))[0][0]
             out2_val = sorted(dic4.items(), key=operator.itemgetter(1))[0][1]
-            if out == out2 and out_val > out2_val and len(dic3) >= 2:
+            if out == out2 and out_val > out2_val and len(dic3) > int(len(self.my_dots)/3):
                 out = sorted(dic3.items(), key=operator.itemgetter(1))[1][0]
+            if out == out2 and out_val > out2_val and 2<=len(dic3) <= int(len(self.my_dots)/3): 
+                out = sorted(dic3.items(), key=operator.itemgetter(1))[2][0]
             if len(self.getDots(gameState)) <= 4 and out_val > out2_val:
                 if gameState.getAgentState(self.index).numCarrying > 0:
                     return self.goHome(gameState)
@@ -174,13 +176,13 @@ class Agent(CaptureAgent):
         for i in self.enemyGIndex(self.state):
             for j in self.enemyGIndex(gameState):
                 if i == j:
-                    if self.getMazeDistance(gameState.getAgentState(self.index).getPosition(), gameState.getAgentState(j).getPosition()) <= self.getMazeDistance(gameState.getAgentState(self.index).getPosition(), gameState.getAgentState(i).getPosition()) <= 4:
+                    if self.getMazeDistance(gameState.getAgentState(self.index).getPosition(), gameState.getAgentState(j).getPosition()) <= self.getMazeDistance(gameState.getAgentState(self.index).getPosition(), gameState.getAgentState(i).getPosition()) <= 3:
                         return True          
         return False
 
     def CapOrHome(self, gameState):
         way = self.homeWay(gameState)
-        if len(way) > 0 and ((len(self.getDots(gameState)) <= 2) or(gameState.data.timeleft < 150 and gameState.getAgentState(self.index).numCarrying > 0) or (len(way) <= 5 and gameState.getAgentState(self.index).numCarrying >= 4 and not self.oppoPac(gameState))):
+        if len(way) > 0 and ((len(self.getDots(gameState)) <= 2) or(gameState.data.timeleft < 20 and gameState.getAgentState(self.index).numCarrying > 0) or (len(way) <= 5 and gameState.getAgentState(self.index).numCarrying >= 4 and not self.oppoPac(gameState))):
             return way[0]
         mostDangerous = self.notGo2(gameState)
         a = None
