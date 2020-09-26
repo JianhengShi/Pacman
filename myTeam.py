@@ -86,7 +86,7 @@ class Agent(CaptureAgent):
         for i in self.enemyPIndex(gameState):
             a += self.getMazeDistance(gameState.getAgentState(self.index).getPosition(), gameState.getAgentState(i).getPosition())
             b += self.getMazeDistance(gameState.getAgentState(self.anotherIndex(gameState)).getPosition(), gameState.getAgentState(i).getPosition())
-        if a < b <=4:
+        if a < b:
             return True
         else:
             return False
@@ -107,8 +107,7 @@ class Agent(CaptureAgent):
                     continue
                 if len(path) < b:
                     b = len(path)
-                    a = path
-            
+                    a = path    
         if a is None or len(a) == 0:
             return Directions.STOP
         return a[0]
@@ -117,14 +116,14 @@ class Agent(CaptureAgent):
         if self.go_home:
             return self.goHome(gameState)
         ls = []
-        if len(self.getDots(gameState)) > 15:
+        if len(self.getDots(gameState)) > 1500:
             dic = dict()
             for i in self.getDots(gameState):
                 dic.update({i: self.getMazeDistance(gameState.getAgentState(self.index).getPosition(), i)})
             ls1 = []
             for i in sorted(dic.items(), key=operator.itemgetter(1)):
                 ls1.append(i[0])
-            ls = ls1[0: 15]
+            ls = ls1[0: 1500]
         else:
             ls = self.getDots(gameState)
         dic3 = dict()
@@ -159,10 +158,16 @@ class Agent(CaptureAgent):
         if len(dic4) != 0:
             out2 = sorted(dic4.items(), key=operator.itemgetter(1))[0][0]
             out2_val = sorted(dic4.items(), key=operator.itemgetter(1))[0][1]
-            if out == out2 and out_val > out2_val and len(dic3) > int(len(self.my_dots)/3):
+            '''
+            if out == out2 and out_val > out2_val and len(dic3) > int(len(self.my_dots)*2/3):
                 out = sorted(dic3.items(), key=operator.itemgetter(1))[1][0]
-            if out == out2 and out_val > out2_val and 3 <=len(dic3) <= int(len(self.my_dots)/3): 
-                out = sorted(dic3.items(), key=operator.itemgetter(1))[2][0]
+            if out == out2 and out_val > out2_val and len(dic3) <= int(len(self.my_dots)*2/3): 
+                out = sorted(dic3.items(), key=operator.itemgetter(1))[len(dic3)-1][0]
+            
+            '''
+            if out == out2 and out_val > out2_val and len(dic3) >=2:
+                out = sorted(dic3.items(), key=operator.itemgetter(1))[1][0]
+            
             if len(self.getDots(gameState)) <= 4 and out_val > out2_val:
                 if gameState.getAgentState(self.index).numCarrying > 0:
                     
@@ -183,8 +188,11 @@ class Agent(CaptureAgent):
             for j in self.enemyGIndex(gameState):
                 if i == j:
                     if self.ifAtDeadRoute(gameState):
-                        if self.getMazeDistance(gameState.getAgentState(self.index).getPosition(), gameState.getAgentState(j).getPosition()) < self.getMazeDistance(gameState.getAgentState(self.index).getPosition(), gameState.getAgentState(i).getPosition())+1:
+                        '''
+                        if self.getMazeDistance(gameState.getAgentState(self.index).getPosition(), gameState.getAgentState(j).getPosition()) <= self.getMazeDistance(gameState.getAgentState(self.index).getPosition(), gameState.getAgentState(i).getPosition()):
+
                             return True
+                            '''
                     if self.getMazeDistance(gameState.getAgentState(self.index).getPosition(), gameState.getAgentState(j).getPosition()) <= self.getMazeDistance(gameState.getAgentState(self.index).getPosition(), gameState.getAgentState(i).getPosition()) <= 4:
                         return True          
         return False
@@ -229,7 +237,7 @@ class Agent(CaptureAgent):
         return False
 
     def ifAtDeadRoute(self, gameState):##是否在死胡同
-        ls = list(self.spl[2])+list(self.spl[2])
+        ls = list(self.spl[2])+list(self.spl[3])
         if gameState.getAgentState(self.index).getPosition() in ls:
             return True
         else:
