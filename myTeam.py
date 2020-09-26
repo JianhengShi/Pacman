@@ -116,14 +116,14 @@ class Agent(CaptureAgent):
         if self.go_home:
             return self.goHome(gameState)
         ls = []
-        if len(self.getDots(gameState)) > 1500:
+        if len(self.getDots(gameState)) > 15:
             dic = dict()
             for i in self.getDots(gameState):
                 dic.update({i: self.getMazeDistance(gameState.getAgentState(self.index).getPosition(), i)})
             ls1 = []
             for i in sorted(dic.items(), key=operator.itemgetter(1)):
                 ls1.append(i[0])
-            ls = ls1[0: 1500]
+            ls = ls1[0: 15]
         else:
             ls = self.getDots(gameState)
         dic3 = dict()
