@@ -64,14 +64,14 @@ class Agent(CaptureAgent):
             output = self.catch(gameState)
         else:
             if not gameState.getAgentState(self.index).isPacman:
-                output = self.eatFoodAction(gameState)
+                output = self.eatDots(gameState)
             else:
                 if self.ifChase(gameState):
-                    output = self.eatFoodAction(gameState)
+                    output = self.eatDots(gameState)
                 elif (len(self.getDots(gameState)) <= 2) or (gameState.data.timeleft < 30 and gameState.getAgentState(self.index).numCarrying > 0):
                     output = self.goHome(gameState)
                 else:
-                    output = self.eatFoodAction(gameState)
+                    output = self.eatDots(gameState)
         self.state = gameState
         return output
 
@@ -112,7 +112,7 @@ class Agent(CaptureAgent):
             return Directions.STOP
         return a[0]
 
-    def eatFoodAction(self, gameState):
+    def eatDots(self, gameState):
         if self.go_home:
             return self.goHome(gameState)
         ls = []
