@@ -52,30 +52,31 @@ class Agent(CaptureAgent):
 
     def registerInitialState(self, gameState):
         CaptureAgent.registerInitialState(self, gameState)
-        self.state = gameState
+        self.state = gameState## 我的状态
         self.go_home = False
         self.my_dots = self.getMyDots(gameState)
         self.queue = Queue()
-        self.spl = getSpl(gameState, self.red)
+        self.spl = getSpl(gameState, self.red)## 角落和长廊地点
         self.out = getOut(gameState, self.red)
   
     def chooseAction(self, gameState):
         if self.ifCatch(gameState):
-            output = self.catch(gameState)
+            output = self.eatDots(gameState)
         else:
             if not gameState.getAgentState(self.index).isPacman:
                 output = self.eatDots(gameState)
             else:
                 if self.ifChase(gameState):
-                    output = self.eatDots(gameState)
-                elif (len(self.getDots(gameState)) <= 2) or (gameState.data.timeleft < 30 and gameState.getAgentState(self.index).numCarrying > 0):
+                    output = self.CapOrHome(gameState)
+                elif (len(self.getDots(gameState)) <= 2) or (gameState.data.timeleft < 80 and gameState.getAgentState(self.index).numCarrying > 0):
                     output = self.goHome(gameState)
                 else:
-                    output = self.eatDots(gameState)
+                    output = self.eatDots(gameState)   
         self.state = gameState
+        
         return output
 
-    def ifCatch(self, gameState):
+    def ifCatch(self, gameState):##谁近，谁去抓
         if len(self.getDots(gameState)) <= 2 and gameState.getAgentState(self.index).numCarrying == 0:
             return True
         if gameState.getAgentState(self.index).scaredTimer > 0:
@@ -85,12 +86,12 @@ class Agent(CaptureAgent):
         for i in self.enemyPIndex(gameState):
             a += self.getMazeDistance(gameState.getAgentState(self.index).getPosition(), gameState.getAgentState(i).getPosition())
             b += self.getMazeDistance(gameState.getAgentState(self.anotherIndex(gameState)).getPosition(), gameState.getAgentState(i).getPosition())
-        if a < b <2:
+        if a < b <=4:
             return True
         else:
             return False
 
-    def catch(self, gameState):
+    def catch(self, gameState):##捉对面的吃豆人
         ls = []
         ls2 = []
         for i in self.getOpponents(gameState):
@@ -112,18 +113,18 @@ class Agent(CaptureAgent):
             return Directions.STOP
         return a[0]
 
-    def eatDots(self, gameState):
+    def eatDots(self, gameState):##去最近的食物，如果队友也去，那么去第三近的
         if self.go_home:
             return self.goHome(gameState)
         ls = []
-        if len(self.getDots(gameState)) > 10:
+        if len(self.getDots(gameState)) > 15:
             dic = dict()
             for i in self.getDots(gameState):
                 dic.update({i: self.getMazeDistance(gameState.getAgentState(self.index).getPosition(), i)})
             ls1 = []
             for i in sorted(dic.items(), key=operator.itemgetter(1)):
                 ls1.append(i[0])
-            ls = ls1[0: 10]
+            ls = ls1[0: 15]
         else:
             ls = self.getDots(gameState)
         dic3 = dict()
@@ -131,20 +132,22 @@ class Agent(CaptureAgent):
             if self.aStarSearch(gameState, gameState.getAgentState(self.index).getPosition(), [i], self.notGo(gameState)) is None:
                 continue
             dic3.update({i: len(self.aStarSearch(gameState, gameState.getAgentState(self.index).getPosition(), [i], self.notGo(gameState)))})
+        
         if len(dic3) == 0:
+            
             return self.goHome(gameState)
         out = sorted(dic3.items(), key=operator.itemgetter(1))[0][0]
         out_val = sorted(dic3.items(), key=operator.itemgetter(1))[0][1]
         dic4 = dict()
         ls2 = []
-        if len(self.getDots(gameState)) > 10:
+        if len(self.getDots(gameState)) > 15:
             dic = dict()
             for i in self.getDots(gameState):
                 dic.update({i: self.getMazeDistance(gameState.getAgentState(self.anotherIndex(gameState)).getPosition(), i)})
             ls1 = []
             for i in sorted(dic.items(), key=operator.itemgetter(1)):
                 ls1.append(i[0])
-            ls2 = ls1[0: 10]
+            ls2 = ls1[0: 15]
         else:
             ls2 = self.getDots(gameState)
 
@@ -158,51 +161,56 @@ class Agent(CaptureAgent):
             out2_val = sorted(dic4.items(), key=operator.itemgetter(1))[0][1]
             if out == out2 and out_val > out2_val and len(dic3) > int(len(self.my_dots)/3):
                 out = sorted(dic3.items(), key=operator.itemgetter(1))[1][0]
-            if out == out2 and out_val > out2_val and 3<=len(dic3) <= int(len(self.my_dots)/3): 
+            if out == out2 and out_val > out2_val and 3 <=len(dic3) <= int(len(self.my_dots)/3): 
                 out = sorted(dic3.items(), key=operator.itemgetter(1))[2][0]
             if len(self.getDots(gameState)) <= 4 and out_val > out2_val:
                 if gameState.getAgentState(self.index).numCarrying > 0:
+                    
                     return self.goHome(gameState)
                 else:
+                    
                     return self.catch(gameState)
+        
         return self.aStarSearch(gameState, gameState.getAgentState(self.index).getPosition(), [out], self.notGo(gameState))[0]
 
-    def goHome(self, gameState):
+    def goHome(self, gameState):##回家
         if len(self.homeWay(gameState)) == 0:
             return Directions.STOP
         return self.homeWay(gameState)[0]
 
-    def ifChase(self, gameState):
+    def ifChase(self, gameState):##正被追？
         for i in self.enemyGIndex(self.state):
             for j in self.enemyGIndex(gameState):
                 if i == j:
-                    if self.getMazeDistance(gameState.getAgentState(self.index).getPosition(), gameState.getAgentState(j).getPosition()) <= self.getMazeDistance(gameState.getAgentState(self.index).getPosition(), gameState.getAgentState(i).getPosition()) <= 3:
+                    if self.ifAtDeadRoute(gameState):
+                        if self.getMazeDistance(gameState.getAgentState(self.index).getPosition(), gameState.getAgentState(j).getPosition()) < self.getMazeDistance(gameState.getAgentState(self.index).getPosition(), gameState.getAgentState(i).getPosition())+1:
+                            return True
+                    if self.getMazeDistance(gameState.getAgentState(self.index).getPosition(), gameState.getAgentState(j).getPosition()) <= self.getMazeDistance(gameState.getAgentState(self.index).getPosition(), gameState.getAgentState(i).getPosition()) <= 4:
                         return True          
         return False
 
-    def CapOrHome(self, gameState):
+    def CapOrHome(self, gameState):##被追去吃药丸或回家
         way = self.homeWay(gameState)
-        if len(way) > 0 and ((len(self.getDots(gameState)) <= 2) or(gameState.data.timeleft < 20 and gameState.getAgentState(self.index).numCarrying > 0) or (len(way) <= 5 and gameState.getAgentState(self.index).numCarrying >= 4 and not self.oppoPac(gameState))):
+        if len(way) > 0 and ((len(self.getDots(gameState)) <= 2) or(gameState.data.timeleft < 80 and gameState.getAgentState(self.index).numCarrying > 0) or (len(way) <= 5 and gameState.getAgentState(self.index).numCarrying >= 4 and not self.oppoPac(gameState))):
             return way[0]
-        mostDangerous = self.notGo2(gameState)
         a = None
         b = 999999  
         for i in self.getCapsules(gameState):
-            path = self.aStarSearch(gameState, gameState.getAgentState(self.index).getPosition(), [i], mostDangerous)
+            path = self.aStarSearch(gameState, gameState.getAgentState(self.index).getPosition(), [i], self.notGo2(gameState))
             if path is None:
                 continue
             if len(path) < b:
                 b = len(path)
                 a = i
         if a is not None:
-            return self.aStarSearch(gameState, gameState.getAgentState(self.index).getPosition(), [a], mostDangerous)[0]
+            return self.aStarSearch(gameState, gameState.getAgentState(self.index).getPosition(), [a], self.notGo2(gameState))[0]
         else:
             if len(way) == 0:
                 return Directions.STOP
             else:
                 return way[0]
 
-    def ifGoHome(self, gameState):
+    def ifGoHome(self, gameState):##是否回家
         if not self.ifAtDeadRoute(gameState):
             return False
         if self.go_home is True:
@@ -220,19 +228,20 @@ class Agent(CaptureAgent):
                 return True
         return False
 
-    def ifAtDeadRoute(self, gameState):
+    def ifAtDeadRoute(self, gameState):##是否在死胡同
         ls = list(self.spl[2])+list(self.spl[2])
         if gameState.getAgentState(self.index).getPosition() in ls:
             return True
         else:
             return False
 
-    def aStarSearch(self, gameState, start, goal, lis):
+    def aStarSearch(self, gameState, start, goal, lis):##a*搜索
         pq = PriorityQueue()
         c_set = set()
         pq.push((start, [], float('inf')), 0)
         dic = collections.defaultdict(lambda: float('inf'))
         if goal[0] in lis:
+            
             return None
         while not pq.isEmpty():
             node = pq.pop()
@@ -251,13 +260,13 @@ class Agent(CaptureAgent):
                 for i, j in successors:
                     pq.update((i, node[1] +[j],len(node[1]) + 1), len(node[1]) + 1 + max(self.getMazeDistance(i, goal)for goal in goal))
 
-    def getMyDots(self, gameState):
+    def getMyDots(self, gameState):##本方一开始的豆子
         return self.getFoodYouAreDefending(gameState).asList() + self.getCapsulesYouAreDefending(gameState)
 
-    def oppoPac(self, gameState):
+    def oppoPac(self, gameState):##对面全是吃豆人？
         return gameState.getAgentState(self.getOpponents(gameState)[0]).isPacman and gameState.getAgentState(self.getOpponents(gameState)[1]).isPacman
 
-    def enemyPosition(self, gameState):
+    def enemyPosition(self, gameState):##对面的位置
         lis = []
         if gameState.getAgentPosition(self.getOpponents(gameState)[0]) is not None:
             lis.append(self.getOpponents(gameState)[0])
@@ -265,33 +274,33 @@ class Agent(CaptureAgent):
             lis.append(self.getOpponents(gameState)[1])
         return lis
 
-    def enemyGIndex(self, gameState):
+    def enemyGIndex(self, gameState):##对面幽灵的index
         output = []
         for i in self.enemyPosition(gameState):
             if not gameState.getAgentState(i).isPacman and gameState.getAgentState(i).scaredTimer<=5:
                 output.append(i)
         return output
 
-    def enemyPPosition(self, gameState):
+    def enemyGPosition(self, gameState):##对面幽灵的位置
+        out = []
+        for i in self.enemyGIndex(gameState):
+            out.append(gameState.getAgentState(i).getPosition())
+        return out
+
+    def enemyPPosition(self, gameState):##对面吃豆人的位置
         out = []
         for i in self.enemyPIndex(gameState):
             out.append(gameState.getAgentState(i).getPosition())
         return out
 
-    def enemyPIndex(self, gameState):
+    def enemyPIndex(self, gameState):##对面吃豆人的index
         output = []
         for i in self.enemyPosition(gameState):
             if gameState.getAgentState(i).isPacman:
                 output.append(i)
         return output
 
-    def enemyGPosition(self, gameState):
-        out = []
-        for ghost in self.enemyGIndex(gameState):
-            out.append(gameState.getAgentState(ghost).getPosition())
-        return out
-
-    def notGo(self, gameState):
+    def notGo(self, gameState):##危险的地方
         output = []
         output=self.enemyGPosition(gameState)
         for i in self.enemyGPosition(gameState):
@@ -300,24 +309,26 @@ class Agent(CaptureAgent):
                 for j in getAroundPositions(gameState, i):
                     if j in getMyLine(gameState, self.red) and gameState.getAgentState(self.index).scaredTimer == 0:
                         output.remove(j)
-            if self.getMazeDistance(i, gameState.getAgentState(self.index).getPosition())<=4:
+            if self.getMazeDistance(i, gameState.getAgentState(self.index).getPosition())<=5:
                 output=output+list(self.spl[2])
                 output=output+list(self.spl[3])
+        '''
         for j in self.enemyPPosition(gameState):
             if self.red and j in getMyLine(gameState, self.red):
                 output.append((int(j[0] + 1), int(j[1])))
             if not self.red and j in getMyLine(gameState, self.red):
                 output.append((int(j[0] - 1), int(j[1])))
-            if self.getMazeDistance(j, gameState.getAgentState(self.index).getPosition())<=4:
+            if self.getMazeDistance(j, gameState.getAgentState(self.index).getPosition())<=5:
                 output=output+list(self.spl[2])
                 output=output+list(self.spl[3])
+        '''
         if gameState.getAgentState(self.index).scaredTimer > 0:
             output=output+self.enemyPPosition(gameState)
             for k in self.enemyPPosition(gameState):
                 output=output+list(getAroundPositions(gameState, k))
         return output
 
-    def notGo2(self, gameState):
+    def notGo2(self, gameState):##不包括死胡同的危险地方
         output = []
         output=self.enemyGPosition(gameState)
         for i in self.enemyGPosition(gameState):
@@ -337,21 +348,21 @@ class Agent(CaptureAgent):
                 output=output+list(getAroundPositions(gameState, k))
         return output    
 
-    def anotherIndex(self, gameState):
+    def anotherIndex(self, gameState):##另一个的index
         if self.index == self.getTeam(gameState)[0]:
             index = self.getTeam(gameState)[1]
         else:
             index = self.getTeam(gameState)[0]
         return index
 
-    def homeWay(self, gameState):
+    def homeWay(self, gameState):##回家的最近路
         dp = self.notGo(gameState)
         p = gameState.getAgentState(self.index).getPosition()
         line = getMyLine(gameState, self.red)
         way = None
         a = 9999999
-        for border in line:
-            path = self.aStarSearch(gameState, p, [border], dp)
+        for i in line:
+            path = self.aStarSearch(gameState, p, [i], dp)
             if path is not None and len(path) < a:
                 a = len(path)
                 way = path
@@ -359,10 +370,10 @@ class Agent(CaptureAgent):
             return []
         return way
 
-    def getDots(self, gameState):
+    def getDots(self, gameState):##剩余的本方食物
         return self.getFood(gameState).asList()
 
-def getMyLine(gameState, red):
+def getMyLine(gameState, red):##我的边界
     a = gameState.data.layout.width // 2
     if red:
         a= a - 1
@@ -372,7 +383,7 @@ def getMyLine(gameState, red):
             ls.append((a, y))
     return ls
 
-def getOppoLine(gameState, red):
+def getOppoLine(gameState, red):##对面的边界
     a = gameState.data.layout.width // 2
     if not red:
         a = a - 1
@@ -382,7 +393,7 @@ def getOppoLine(gameState, red):
             ls.append((a, y))
     return ls
 
-def getAroundPositions(gameState, pos):
+def getAroundPositions(gameState, pos):##周围
     list1 = [(int(pos[0])-1,int(pos[1])), (int(pos[0])+1,int(pos[1])), (int(pos[0]),int(pos[1]+1)), (int(pos[0]),int(pos[1]-1))]
     set1 = set(list1)
     for i in range(len(list1)):
@@ -391,7 +402,7 @@ def getAroundPositions(gameState, pos):
             set1.remove((a,b))
     return set1
 
-def getSpl(gameState, red):
+def getSpl(gameState, red):##特殊位置
     list1 = []
     map1 = {}
     target1 = set()
@@ -459,7 +470,7 @@ def getSpl(gameState, red):
         return_list.append(target2)
     return return_list
 
-def getOut(gameState, isRed):
+def getOut(gameState, isRed):##出口
     dic = {}
     set1 = set()
     for x in range(1, gameState.data.layout.width):
@@ -472,27 +483,27 @@ def getOut(gameState, isRed):
     dic2 = {}
     c_set = set1.copy()
     out = {}
-    for corner in set1:
-        tem_set = dic[corner]
+    for i in set1:
+        tem_set = dic[i]
         q = list(tem_set)
-        dic2[corner] = [corner]
+        dic2[i] = [i]
         while len(q) != 0:
             item = q.pop()
             if item not in dic.keys():
                 dic[item] = getAroundPositions(gameState, item)
             tem_set2 = dic[item]
             if len(tem_set2) != 2:
-                out[item]=dic2[corner]
+                out[item]=dic2[i]
                 continue
             else:
                 c_set.add(item)
-                dic2[corner].append(item)
-            for i in tem_set2:
-                if i not in c_set:
-                    q.append(i)
+                dic2[i].append(item)
+            for j in tem_set2:
+                if j not in c_set:
+                    q.append(j)
     return out
 
-def doGetOut(out, p):
+def doGetOut(out, p):##找出口
     for i, j in out.items():
         if p in j:
             return i
