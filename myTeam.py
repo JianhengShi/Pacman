@@ -158,7 +158,7 @@ class Agent(CaptureAgent):
             out2_val = sorted(dic4.items(), key=operator.itemgetter(1))[0][1]
             if out == out2 and out_val > out2_val and len(dic3) > int(len(self.my_dots)/3):
                 out = sorted(dic3.items(), key=operator.itemgetter(1))[1][0]
-            if out == out2 and out_val > out2_val and 2<=len(dic3) <= int(len(self.my_dots)/3): 
+            if out == out2 and out_val > out2_val and 3<=len(dic3) <= int(len(self.my_dots)/3): 
                 out = sorted(dic3.items(), key=operator.itemgetter(1))[2][0]
             if len(self.getDots(gameState)) <= 4 and out_val > out2_val:
                 if gameState.getAgentState(self.index).numCarrying > 0:
