@@ -60,9 +60,11 @@ class Agent(CaptureAgent):
         self.spl = getSpl(gameState, self.red)## 角落和长廊地点
         self.out = getOut(gameState, self.red)
         self.pos = []
+        self.stuckThreshold = 11
+        self.safeBreakTie = 3
   
     def chooseAction(self, gameState):  
-        if len(self.pos) == 7 and self.ifStuck():
+        if len(self.pos) == self.stuckThreshold and self.ifStuck():
             output = self.breaktie(gameState)
         elif self.ifCatch(gameState):
             output = self.eatDots(gameState)
@@ -81,15 +83,29 @@ class Agent(CaptureAgent):
         return output
 
     def updateposhistory(self, gameState):
-        if len(self.pos) < 7:
+        if len(self.pos) < self.stuckThreshold:
             self.pos.append(gameState.getAgentPosition(self.index))
         else:
             self.pos.pop(0)
             self.pos.append(gameState.getAgentPosition(self.index))
 
     def ifStuck(self):
-        if self.pos[0] == self.pos[2] and self.pos[2] == self.pos[4] and self.pos[4] == self.pos[6]:
-            return True
+        print(self.index)
+        print(self.pos)
+        oddCount = 0
+        evenCount = 0
+        for i in range (0,self.stuckThreshold-1,2):
+            if self.pos[i] == self.pos[i+2]:
+                evenCount += 1
+                print("evenCount", evenCount)
+        for i in range (1,self.stuckThreshold-2,2):
+            if self.pos[i] == self.pos[i+2]:
+                oddCount += 1
+                print("oddCount",oddCount)
+        if evenCount == self.stuckThreshold // 2:
+            if oddCount == self.stuckThreshold // 2 - 1: 
+                print("stuck")
+                return True
         else:
             return False
 
