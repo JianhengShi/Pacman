@@ -52,30 +52,43 @@ def createTeam(firstIndex, secondIndex, isRed,
 class Agent(CaptureAgent):
 
     def registerInitialState(self, gameState):
+        '''
+        Initialize state.
+        '''
         CaptureAgent.registerInitialState(self, gameState)
-        self.state = gameState## 我的状态
+        self.state = gameState
         self.go_home = False
         self.my_dots = self.getMyDots(gameState)
         self.queue = Queue()
-        self.spl = getSpl(gameState, self.red)## 角落和长廊地点
+        self.spl = getSpl(gameState, self.red)
         self.out = getOut(gameState, self.red)
-        self.pos = []
-        self.stuckThreshold = 11
-        self.safeBreakTie = 3
+        self.pos = [] #List of position history
+        self.stuckThreshold = 15
+        self.safeBreakTie = 2
   
     def chooseAction(self, gameState):  
+        '''
+        Logic of choosing action.
+        Strategy that emphasizes offense.
+        '''
+        # If teh agent is stuck
         if len(self.pos) == self.stuckThreshold and self.ifStuck():
             output = self.breaktie(gameState)
         elif self.ifCatch(gameState):
             output = self.eatDots(gameState)
         else:
+            # If the agent is ghost, go back to offense
             if not gameState.getAgentState(self.index).isPacman:
                 output = self.eatDots(gameState)
+            # If the agent is Pacman
             else:
+                # If under chasing, go to capsule or go home
                 if self.ifChase(gameState):
                     output = self.CapOrHome(gameState)
+                # If eats 18 dots or time is up
                 elif (len(self.getDots(gameState)) <= 2) or (gameState.data.timeleft < 80 and gameState.getAgentState(self.index).numCarrying > 0):
                     output = self.goHome(gameState)
+                # Otherwise, eat dots
                 else:
                     output = self.eatDots(gameState)   
         self.state = gameState
@@ -83,6 +96,9 @@ class Agent(CaptureAgent):
         return output
 
     def updateposhistory(self, gameState):
+        '''
+        Update position history of the agent.
+        '''
         if len(self.pos) < self.stuckThreshold:
             self.pos.append(gameState.getAgentPosition(self.index))
         else:
@@ -90,26 +106,29 @@ class Agent(CaptureAgent):
             self.pos.append(gameState.getAgentPosition(self.index))
 
     def ifStuck(self):
-        print(self.index)
-        print(self.pos)
+        '''
+        Check if the agent is stuck. If stuck, return True.
+        '''
         oddCount = 0
         evenCount = 0
         for i in range (0,self.stuckThreshold-1,2):
             if self.pos[i] == self.pos[i+2]:
                 evenCount += 1
-                print("evenCount", evenCount)
         for i in range (1,self.stuckThreshold-2,2):
             if self.pos[i] == self.pos[i+2]:
                 oddCount += 1
-                print("oddCount",oddCount)
         if evenCount == self.stuckThreshold // 2:
             if oddCount == self.stuckThreshold // 2 - 1: 
-                print("stuck")
+                # print("stuck")
                 return True
         else:
             return False
 
     def breaktie(self,gameState):
+        '''
+        Return a random action (excluding those will leads to dangerous positions) 
+        if the agent is stuck. 
+        '''
         safeAction = []
         dp = self.notGo(gameState)
         legalActions = gameState.getLegalActions(self.index)
@@ -121,12 +140,22 @@ class Agent(CaptureAgent):
                 if action != Directions.STOP:  
                     safeAction.append(action)
         if len(safeAction) != 0:
-            out = random.choice(safeAction)
+            if self.safeBreakTie > 0:
+                out = random.choice(safeAction)
+                self.safeBreakTie =- 1
+            else:
+                out = random.choice(legalActions)
+                self.safeBreakTie = 2
         else:
-            out = self.eatDots(gameState) #if cannot find safe move, stay stuck
+            out = random.choice(legalActions)
         return out
 
-    def ifCatch(self, gameState):##谁近，谁去抓
+    def ifCatch(self, gameState):
+        '''
+        Return True if this agent is closer to opponents Pacman.
+        Return False if it is further or it is a scared Ghost.
+        谁近，谁去抓
+        '''
         if len(self.getDots(gameState)) <= 2 and gameState.getAgentState(self.index).numCarrying == 0:
             return True
         if gameState.getAgentState(self.index).scaredTimer > 0:
@@ -141,7 +170,11 @@ class Agent(CaptureAgent):
         else:
             return False
 
-    def catch(self, gameState):##捉对面的吃豆人
+    def catch(self, gameState):
+        '''
+        Return an action to chatch opponents' Pacman.
+        捉对面的吃豆人
+        '''
         ls = []
         ls2 = []
         for i in self.getOpponents(gameState):
@@ -162,7 +195,13 @@ class Agent(CaptureAgent):
             return Directions.STOP
         return a[0]
 
-    def eatDots(self, gameState):##去最近的食物，如果队友也去，那么去第三近的
+    def eatDots(self, gameState):
+        '''
+        Return an action to eat dots.
+        Logistic is: go to the nearest food, if teammate goes to that position either, 
+        change to chase the third nearest food.
+        去最近的食物，如果队友也去，那么去第三近的
+        '''
         if self.go_home:
             return self.goHome(gameState)
         ls = []
@@ -229,12 +268,20 @@ class Agent(CaptureAgent):
         
         return self.aStarSearch(gameState, gameState.getAgentState(self.index).getPosition(), [out], self.notGo(gameState))[0]
 
-    def goHome(self, gameState):##回家
+    def goHome(self, gameState):
+        '''
+        Return an action that leads the agent home.
+        回家
+        '''
         if len(self.homeWay(gameState)) == 0:
             return Directions.STOP
         return self.homeWay(gameState)[0]
 
-    def ifChase(self, gameState):##正被追？
+    def ifChase(self, gameState):
+        '''
+        Return True if this agent is chasing by enemy's Ghost.
+        正被追？
+        '''
         for i in self.enemyGIndex(self.state):
             for j in self.enemyGIndex(gameState):
                 if i == j:
@@ -248,8 +295,13 @@ class Agent(CaptureAgent):
                         return True          
         return False
 
-    def CapOrHome(self, gameState):##被追去吃药丸或回家
+    def CapOrHome(self, gameState):
+        '''
+        Return action to go home or to chase capsule.
+        被追去吃药丸或回家
+        '''
         way = self.homeWay(gameState)
+        # when finish eating 18 dots or time is up, go home
         if len(way) > 0 and ((len(self.getDots(gameState)) <= 2) or(gameState.data.timeleft < 80 and gameState.getAgentState(self.index).numCarrying > 0) or (len(way) <= 5 and gameState.getAgentState(self.index).numCarrying >= 4 and not self.oppoPac(gameState))):
             return way[0]
         a = None
@@ -269,7 +321,11 @@ class Agent(CaptureAgent):
             else:
                 return way[0]
 
-    def ifGoHome(self, gameState):##是否回家
+    def ifGoHome(self, gameState):
+        '''
+        Judge if go home or not.
+        是否回家
+        '''
         if not self.ifAtDeadRoute(gameState):
             return False
         if self.go_home is True:
@@ -287,14 +343,23 @@ class Agent(CaptureAgent):
                 return True
         return False
 
-    def ifAtDeadRoute(self, gameState):##是否在死胡同
+    def ifAtDeadRoute(self, gameState):
+        '''
+        Return True if in dead route on opponents half side of map, otherwise return False.
+        判断是否在死胡同
+        '''
         ls = list(self.spl[2])+list(self.spl[3])
         if gameState.getAgentState(self.index).getPosition() in ls:
             return True
         else:
             return False
 
-    def aStarSearch(self, gameState, start, goal, lis):##a*搜索
+    def aStarSearch(self, gameState, start, goal, lis):
+        '''
+        A star search.
+        Use Maze distance as heuristic.
+        Where lis is a list of dangerous places we should not go.
+        '''
         pq = PriorityQueue()
         c_set = set()
         pq.push((start, [], float('inf')), 0)
@@ -319,13 +384,25 @@ class Agent(CaptureAgent):
                 for i, j in successors:
                     pq.update((i, node[1] +[j],len(node[1]) + 1), len(node[1]) + 1 + max(self.getMazeDistance(i, goal)for goal in goal))
 
-    def getMyDots(self, gameState):##本方一开始的豆子
+    def getMyDots(self, gameState):
+        '''
+        Return a list of positions of initial food our agents supposed to defend.
+        我方初始豆子位置
+        '''
         return self.getFoodYouAreDefending(gameState).asList() + self.getCapsulesYouAreDefending(gameState)
 
-    def oppoPac(self, gameState):##对面全是吃豆人？
+    def oppoPac(self, gameState):
+        '''
+        Return True if all of opponent's agents are pacman.
+        对方全是Pacman？
+        '''
         return gameState.getAgentState(self.getOpponents(gameState)[0]).isPacman and gameState.getAgentState(self.getOpponents(gameState)[1]).isPacman
 
-    def enemyPosition(self, gameState):##对面的位置
+    def enemyPosition(self, gameState):
+        '''
+        Return a list of opponent agents indices if we can see its position.
+        哪个对方的agent在我方视野范围内
+        '''
         lis = []
         if gameState.getAgentPosition(self.getOpponents(gameState)[0]) is not None:
             lis.append(self.getOpponents(gameState)[0])
@@ -333,33 +410,59 @@ class Agent(CaptureAgent):
             lis.append(self.getOpponents(gameState)[1])
         return lis
 
-    def enemyGIndex(self, gameState):##对面幽灵的index
+    def enemyGIndex(self, gameState):
+        '''
+        Return a list of opponent agents indices if it is nearby us and 
+        it is ghost and it is not scared (or scared time almost done).
+        In a word, which is is a threat to our agents.
+        附近的有威胁的Ghost敌人的index
+        '''
         output = []
         for i in self.enemyPosition(gameState):
             if not gameState.getAgentState(i).isPacman and gameState.getAgentState(i).scaredTimer<=5:
                 output.append(i)
         return output
 
-    def enemyGPosition(self, gameState):##对面幽灵的位置
+    def enemyGPosition(self, gameState):
+        '''
+        Return a list of opponent agents positions if it is nearby us and 
+        it is ghost and it is not scared (or scared time almost done).
+        In a word, which is is a threat to our agents.
+        附近的有威胁的Ghost敌人的位置
+        '''
         out = []
         for i in self.enemyGIndex(gameState):
             out.append(gameState.getAgentState(i).getPosition())
         return out
 
-    def enemyPPosition(self, gameState):##对面吃豆人的位置
+    def enemyPPosition(self, gameState):
+        '''
+        Return a list of opponent agents positions if it is nearby us and it is Pacman.
+        附近的Pacman敌人的位置
+        '''
         out = []
         for i in self.enemyPIndex(gameState):
             out.append(gameState.getAgentState(i).getPosition())
         return out
 
-    def enemyPIndex(self, gameState):##对面吃豆人的index
+    def enemyPIndex(self, gameState):
+        '''
+        Return a list of opponent agents indices if it is nearby us and it is Pacman.
+        附近的Pacman敌人的index
+        '''
         output = []
         for i in self.enemyPosition(gameState):
             if gameState.getAgentState(i).isPacman:
                 output.append(i)
         return output
 
-    def notGo(self, gameState):##危险的地方
+    def notGo(self, gameState):
+        '''
+        Return a list of dangerous positions for us in this game state, 
+        including positions nearby Ghost enemies and dear route.
+        We should avoid actions go to these positions.
+        不要去的位置（包括敌人附近和死胡同）
+        '''
         output = []
         output=self.enemyGPosition(gameState)
         for i in self.enemyGPosition(gameState):
@@ -387,7 +490,13 @@ class Agent(CaptureAgent):
                 output=output+list(getAroundPositions(gameState, k))
         return output
 
-    def notGo2(self, gameState):##不包括死胡同的危险地方
+    def notGo2(self, gameState):
+        '''
+        Return a list of dangerous positions for us in this game state.
+        We should avoid actions go to these positions.
+        This function not including dead ends or corrider leading to a dead ends as dangerous place.
+        不要去的位置（包括敌人附近，不包括死胡同）
+        '''
         output = []
         output=self.enemyGPosition(gameState)
         for i in self.enemyGPosition(gameState):
@@ -407,14 +516,22 @@ class Agent(CaptureAgent):
                 output=output+list(getAroundPositions(gameState, k))
         return output    
 
-    def anotherIndex(self, gameState):##另一个的index
+    def anotherIndex(self, gameState):
+        '''
+        Return index of another agent of ours.
+        友军的index  
+        '''
         if self.index == self.getTeam(gameState)[0]:
             index = self.getTeam(gameState)[1]
         else:
             index = self.getTeam(gameState)[0]
         return index
 
-    def homeWay(self, gameState):##回家的最近路
+    def homeWay(self, gameState):
+        '''
+        Return a list of actions of shortest way to go back to our side to unload food.
+        最近的回家的路
+        '''
         dp = self.notGo(gameState)
         p = gameState.getAgentState(self.index).getPosition()
         line = getMyLine(gameState, self.red)
@@ -429,10 +546,22 @@ class Agent(CaptureAgent):
             return []
         return way
 
-    def getDots(self, gameState):##剩余的本方食物
+    def getDots(self, gameState):
+        '''
+        Return a list of positions of remained food our agents supposed to eat.
+        剩余的本方食物
+        '''
         return self.getFood(gameState).asList()
 
-def getMyLine(gameState, red):##我的边界
+######################################
+# Helper functions of reading layout #
+######################################
+
+def getMyLine(gameState, red):
+    '''
+    Return a list of positions of my side bounary, excluding walls.
+    我方半场的边界
+    '''
     a = gameState.data.layout.width // 2
     if red:
         a= a - 1
@@ -442,7 +571,11 @@ def getMyLine(gameState, red):##我的边界
             ls.append((a, y))
     return ls
 
-def getOppoLine(gameState, red):##对面的边界
+def getOppoLine(gameState, red):
+    '''
+    Return a list of positions of opponent bounary, excluding walls.
+    对方半场的边界
+    '''
     a = gameState.data.layout.width // 2
     if not red:
         a = a - 1
@@ -452,7 +585,11 @@ def getOppoLine(gameState, red):##对面的边界
             ls.append((a, y))
     return ls
 
-def getAroundPositions(gameState, pos):##周围
+def getAroundPositions(gameState, pos):
+    '''
+    Given a position, return set of adjacent positions up, down, left and right, excluding walls.
+    周围不包括墙
+    '''
     list1 = [(int(pos[0])-1,int(pos[1])), (int(pos[0])+1,int(pos[1])), (int(pos[0]),int(pos[1]+1)), (int(pos[0]),int(pos[1]-1))]
     set1 = set(list1)
     for i in range(len(list1)):
@@ -461,10 +598,18 @@ def getAroundPositions(gameState, pos):##周围
             set1.remove((a,b))
     return set1
 
-def getSpl(gameState, red):##特殊位置
+def getSpl(gameState, red):
+    '''
+    Return a list of all special positions, 
+    including dead end and corrider leads to a dead end on the layout.
+    Returned list[2] and [3] are special postions on opponents side of layout.
+    Returned list[0] and [1] are special postions on opponents side of layout.
+    特殊位置：死胡同
+    '''
+    # one half of layout
     list1 = []
     map1 = {}
-    target1 = set()
+    target1 = set() # dead ends which only have one legal adjacent position but walls
     for x in range(1,gameState.data.layout.width // 2):
         for y in range(1,gameState.data.layout.height):
             if not gameState.hasWall(x, y):
@@ -473,7 +618,7 @@ def getSpl(gameState, red):##特殊位置
                     target1.add((x, y))
                 else:
                     list1.append((x, y))
-    target2 = set()
+    target2 = set() # positions whose all adjacent positions are dead ends
     a = len(list1)
     b = 0
     while a != b:
@@ -489,9 +634,10 @@ def getSpl(gameState, red):##特殊位置
                     list1.remove(i)
                     target2.add(i)
         b= len(list1)
+    # another half of layout
     list2 = []
     map2 = {}
-    target3 = set()
+    target3 = set() # dead ends which only have one legal adjacent position but walls
     for x in range(gameState.data.layout.width // 2,gameState.data.layout.width):
         for y in range(1,gameState.data.layout.height):
             if not gameState.hasWall(x, y):
@@ -500,7 +646,7 @@ def getSpl(gameState, red):##特殊位置
                     target3.add((x, y))
                 else:
                     list2.append((x, y))
-    target4 = set()
+    target4 = set() # positions whose all adjacent positions are dead ends
     d = len(list2)
     e = 0
     while d != e:
@@ -529,7 +675,11 @@ def getSpl(gameState, red):##特殊位置
         return_list.append(target2)
     return return_list
 
-def getOut(gameState, isRed):##出口
+def getOut(gameState, isRed):
+    '''
+    Return a dictionary contains all exitPosition-deadEndorCorrider pairs
+    返回出口-死胡同的dictionary
+    '''
     dic = {}
     set1 = set()
     for x in range(1, gameState.data.layout.width):
@@ -562,7 +712,11 @@ def getOut(gameState, isRed):##出口
                     q.append(j)
     return out
 
-def doGetOut(out, p):##找出口
+def doGetOut(out, p):
+    '''
+    Given an position p, return exit postion of that position.
+    找位置对应的出口
+    '''
     for i, j in out.items():
         if p in j:
             return i
