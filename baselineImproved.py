@@ -146,7 +146,7 @@ class OffensiveReflexAgent(ReflexCaptureAgent):
     if (foodInPac >2):
       goBack = True
     else: goBack = False
-
+  
     # Compute distance to the nearest food
     if goBack==False: # This should always be True,  but better safe than sorry
       myPos = successor.getAgentState(self.index).getPosition()
@@ -198,6 +198,8 @@ class DefensiveReflexAgent(ReflexCaptureAgent):
 
     myState = successor.getAgentState(self.index)
     myPos = myState.getPosition()
+
+    #print(gameState.getAgentState(self.index).scaredTimer)
 
     # Computes whether we're on defense (1) or offense (0)
     features['onDefense'] = 1
