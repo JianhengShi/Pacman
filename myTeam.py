@@ -19,6 +19,7 @@ from game import Directions
 from util import Queue
 from util import PriorityQueue
 from captureAgents import CaptureAgent
+import random
 
 #################
 # Team creation #
@@ -58,9 +59,12 @@ class Agent(CaptureAgent):
         self.queue = Queue()
         self.spl = getSpl(gameState, self.red)## 角落和长廊地点
         self.out = getOut(gameState, self.red)
+        self.pos = []
   
-    def chooseAction(self, gameState):
-        if self.ifCatch(gameState):
+    def chooseAction(self, gameState):  
+        if len(self.pos) == 7 and self.ifStuck():
+            output = self.breaktie(gameState)
+        elif self.ifCatch(gameState):
             output = self.eatDots(gameState)
         else:
             if not gameState.getAgentState(self.index).isPacman:
@@ -73,8 +77,25 @@ class Agent(CaptureAgent):
                 else:
                     output = self.eatDots(gameState)   
         self.state = gameState
-        
+        self.updateposhistory(gameState)
         return output
+
+    def updateposhistory(self, gameState):
+        if len(self.pos) < 7:
+            self.pos.append(gameState.getAgentPosition(self.index))
+        else:
+            self.pos.pop(0)
+            self.pos.append(gameState.getAgentPosition(self.index))
+
+    def ifStuck(self):
+        if self.pos[0] == self.pos[2] and self.pos[2] == self.pos[4] and self.pos[4] == self.pos[6]:
+            return True
+        else:
+            return False
+
+    def breaktie(self,gameState):
+        out = random.choice(gameState.getLegalActions(self.index))
+        return out
 
     def ifCatch(self, gameState):##谁近，谁去抓
         if len(self.getDots(gameState)) <= 2 and gameState.getAgentState(self.index).numCarrying == 0:
@@ -137,6 +158,7 @@ class Agent(CaptureAgent):
             return self.goHome(gameState)
         out = sorted(dic3.items(), key=operator.itemgetter(1))[0][0]
         out_val = sorted(dic3.items(), key=operator.itemgetter(1))[0][1]
+
         dic4 = dict()
         ls2 = []
         if len(self.getDots(gameState)) > 15:
