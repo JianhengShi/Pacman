@@ -221,12 +221,11 @@ class Agent(CaptureAgent):
             for j in self.enemyGIndex(gameState):
                 if i == j:
                     if self.ifAtDeadRoute(gameState):
-                        
-                        # if self.getMazeDistance(gameState.getAgentState(self.index).getPosition(), gameState.getAgentState(j).getPosition()) <= self.getMazeDistance(gameState.getAgentState(self.index).getPosition(), gameState.getAgentState(i).getPosition()):
+                        '''
+                        if self.getMazeDistance(gameState.getAgentState(self.index).getPosition(), gameState.getAgentState(j).getPosition()) <= self.getMazeDistance(gameState.getAgentState(self.index).getPosition(), gameState.getAgentState(i).getPosition()):
 
-                        #     return True
-                        return False
-        
+                            return True
+                            '''
                     if self.getMazeDistance(gameState.getAgentState(self.index).getPosition(), gameState.getAgentState(j).getPosition()) <= self.getMazeDistance(gameState.getAgentState(self.index).getPosition(), gameState.getAgentState(i).getPosition()) <= 4:
                         return True          
         return False
