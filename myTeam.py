@@ -440,7 +440,7 @@ class Agent(CaptureAgent):
         return output
 
     def notGo(self, gameState):
-         '''
+        '''
         Return a list of dangerous positions for us in this game state, 
         including positions nearby Ghost enemies and dear route.
         We should avoid actions go to these positions.
