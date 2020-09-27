@@ -94,7 +94,20 @@ class Agent(CaptureAgent):
             return False
 
     def breaktie(self,gameState):
-        out = random.choice(gameState.getLegalActions(self.index))
+        safeAction = []
+        dp = self.notGo(gameState)
+        legalActions = gameState.getLegalActions(self.index)
+        x, y = gameState.getAgentPosition(self.index)
+        for action in legalActions:
+            dx, dy = Actions.directionToVector(action)
+            nextPos = (int(x+dx), int(y+dy))
+            if nextPos not in dp:
+                if action != Directions.STOP:  
+                    safeAction.append(action)
+        if len(safeAction) != 0:
+            out = random.choice(safeAction)
+        else:
+            out = self.eatDots(gameState) #if cannot find safe move, stay stuck
         return out
 
     def ifCatch(self, gameState):##谁近，谁去抓
