@@ -68,6 +68,8 @@ class Agent(CaptureAgent):
         #self.debugDraw(list(getSpl(gameState, False)[2]), [0,1,0], clear=False)
         #self.debugDraw(list(getSpl(gameState, False)[3]), [0,1,0], clear=False)
         #self.debugDraw(list(getOut(gameState, True).keys()), [0,1,1], clear=False)
+        self.stuckThreshold = 15
+        self.safeBreakTie = 2
   
     def chooseAction(self, gameState):  
         '''
@@ -75,7 +77,7 @@ class Agent(CaptureAgent):
         Strategy that emphasizes offense.
         '''
         # If teh agent is stuck
-        if len(self.pos) == 7 and self.ifStuck():
+        if len(self.pos) == self.stuckThreshold and self.ifStuck():
             output = self.breaktie(gameState)
         elif self.ifCatch(gameState):
             output = self.eatDots(gameState)
@@ -108,7 +110,7 @@ class Agent(CaptureAgent):
         '''
         Update position history of the agent.
         '''
-        if len(self.pos) < 7:
+        if len(self.pos) < self.stuckThreshold:
             self.pos.append(gameState.getAgentPosition(self.index))
         else:
             self.pos.pop(0)
@@ -116,10 +118,20 @@ class Agent(CaptureAgent):
 
     def ifStuck(self):
         '''
-        Check if the agent is stuck. If stuck, returnn True.
+        Check if the agent is stuck. If stuck, return True.
         '''
-        if self.pos[0] == self.pos[2] and self.pos[2] == self.pos[4] and self.pos[4] == self.pos[6]:
-            return True
+        oddCount = 0
+        evenCount = 0
+        for i in range (0,self.stuckThreshold-1,2):
+            if self.pos[i] == self.pos[i+2]:
+                evenCount += 1
+        for i in range (1,self.stuckThreshold-2,2):
+            if self.pos[i] == self.pos[i+2]:
+                oddCount += 1
+        if evenCount == self.stuckThreshold // 2:
+            if oddCount == self.stuckThreshold // 2 - 1: 
+                # print("stuck")
+                return True
         else:
             return False
 
@@ -139,9 +151,14 @@ class Agent(CaptureAgent):
                 if action != Directions.STOP:  
                     safeAction.append(action)
         if len(safeAction) != 0:
-            out = random.choice(safeAction)
+            if self.safeBreakTie > 0:
+                out = random.choice(safeAction)
+                self.safeBreakTie =- 1
+            else:
+                out = random.choice(legalActions)
+                self.safeBreakTie = 2
         else:
-            out = self.eatDots(gameState) #if cannot find safe move, stay stuck
+            out = random.choice(legalActions)
         return out
 
     def ifCatch(self, gameState):
