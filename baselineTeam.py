@@ -60,6 +60,7 @@ class ReflexCaptureAgent(CaptureAgent):
  
   def registerInitialState(self, gameState):
     self.start = gameState.getAgentPosition(self.index)
+    # print(self.index, self.start)
     CaptureAgent.registerInitialState(self, gameState)
 
   def chooseAction(self, gameState):
@@ -96,6 +97,7 @@ class ReflexCaptureAgent(CaptureAgent):
     Finds the next successor which is a grid position (location tuple).
     """
     successor = gameState.generateSuccessor(self.index, action)
+    # print(successor)
     pos = successor.getAgentState(self.index).getPosition()
     if pos != nearestPoint(pos):
       # Only half a grid position was covered
@@ -182,6 +184,7 @@ class DefensiveReflexAgent(ReflexCaptureAgent):
     if action == rev: features['reverse'] = 1
 
     return features
+    
 
   def getWeights(self, gameState, action):
     return {'numInvaders': -1000, 'onDefense': 100, 'invaderDistance': -10, 'stop': -100, 'reverse': -2}
