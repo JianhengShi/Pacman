@@ -14,6 +14,7 @@
 import operator
 import collections
 import numpy as np
+import util
 from game import Actions
 from game import Directions
 from util import Queue
@@ -63,6 +64,10 @@ class Agent(CaptureAgent):
         self.spl = getSpl(gameState, self.red)
         self.out = getOut(gameState, self.red)
         self.pos = [] #List of position history
+        # draw layout with dead end routes and their exits
+        #self.debugDraw(list(getSpl(gameState, False)[2]), [0,1,0], clear=False)
+        #self.debugDraw(list(getSpl(gameState, False)[3]), [0,1,0], clear=False)
+        #self.debugDraw(list(getOut(gameState, True).keys()), [0,1,1], clear=False)
   
     def chooseAction(self, gameState):  
         '''
@@ -82,7 +87,12 @@ class Agent(CaptureAgent):
             else:
                 # If under chasing, go to capsule or go home
                 if self.ifChase(gameState):
-                    output = self.CapOrHome(gameState)
+                    #print("is Chasing")
+                    if self.shouldGetOutDeadRoute(gameState):
+                        #print("Should get out of dead route!")
+                        output = self.leaveDeadRoute(gameState)                       
+                    else: 
+                        output = self.CapOrHome(gameState)                    
                 # If eats 18 dots or time is up
                 elif (len(self.getDots(gameState)) <= 2) or (gameState.data.timeleft < 80 and gameState.getAgentState(self.index).numCarrying > 0):
                     output = self.goHome(gameState)
@@ -91,6 +101,7 @@ class Agent(CaptureAgent):
                     output = self.eatDots(gameState)   
         self.state = gameState
         self.updateposhistory(gameState)
+
         return output
 
     def updateposhistory(self, gameState):
@@ -367,6 +378,26 @@ class Agent(CaptureAgent):
                 for i, j in successors:
                     pq.update((i, node[1] +[j],len(node[1]) + 1), len(node[1]) + 1 + max(self.getMazeDistance(i, goal)for goal in goal))
 
+    '''
+    def breadthFirstSearch(self, gameState, start):
+        closed = []
+        locationQueue = util.Queue()
+        locationQueue.push(start)
+        distance = 0
+        while not locationQueue.isEmpty():
+            node = locationQueue.pop()
+            if node.isGhost(): # Goal test
+                return distance
+            if node not in closed:
+                successor = self.getAroundPositions(gameState, node)
+                closed.append(node)
+                distance+=1
+                for location in successor: 
+                    if location not in closed:
+                        statesQueue.push(location)
+        return 999999
+    '''
+
     def getMyDots(self, gameState):
         '''
         Return a list of positions of initial food our agents supposed to defend.
@@ -536,6 +567,55 @@ class Agent(CaptureAgent):
         '''
         return self.getFood(gameState).asList()
 
+    def leaveDeadRoute(self, gameState):
+        '''
+        Return a action leaves dead route
+        在ghost抓住前逃离死胡同
+        '''
+        exitPos = doGetOut(self.out, gameState.getAgentState(self.index).getPosition())
+        if exitPos is not None:
+            path = self.aStarSearch(gameState, gameState.getAgentState(self.index).getPosition(), [exitPos], [])
+            return path[0]
+
+    def shouldGetOutDeadRoute(self, gameState):
+        '''
+        Judge if it is neccessary or have chance to get out of dead route
+        判断是否需要逃离死胡同
+        '''
+        myPos =  gameState.getAgentState(self.index).getPosition()
+        if self.ifAtDeadRoute(gameState):
+            exitPos = doGetOut(self.out, myPos)
+            if exitPos is None:
+                return False
+            myDist = getMDist(myPos, exitPos)
+            enemyDis = 9999999
+            for enemyPos in self.enemyGPosition(gameState):
+                enemyDist = min(enemyDis, getMDist(enemyPos, exitPos))
+            if myDist < enemyDist:
+                return True
+            else: return False
+        else: return False
+    
+    def getOppoPosRange(self, gameState):
+        oppo = self.getOpponents(gameState)
+        agentDisWithNoise = gameState.getAgentDistances()
+        disRange1 = (agentDisWithNoise[oppo[0]]-6, agentDisWithNoise[oppo[0]]+6)
+        disRange2 = (agentDisWithNoise[oppo[1]]-6, agentDisWithNoise[oppo[1]]+6)
+        lis1 = []
+        lis2 = []
+        for i in range(disRange1):
+            continue
+        return 
+
+    def getLocFromMDis(self, gameState, distance):
+        lis = []
+        for i in range(1, gameState.data.layout.width-1):
+            for j in range(1, gameState.data.layout.height-1):
+                if getMDis(gameState.getAgentState(self.index).getPosition(), (i,j))==distance:
+                    if not gameState.hasWall(i,j):
+                        lis.append((i,j))
+        return lis
+
 ######################################
 # Helper functions of reading layout #
 ######################################
@@ -704,3 +784,9 @@ def doGetOut(out, p):
         if p in j:
             return i
     return None
+
+def getMDist(pos1, pos2):
+    '''
+    Manhattan Distance
+    '''
+    return abs(pos1[0]-pos2[0]) + abs(pos1[1]-pos2[1])
