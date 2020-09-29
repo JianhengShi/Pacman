@@ -315,6 +315,8 @@ class Agent(CaptureAgent):
                 a = i
         if a is not None:
             return self.aStarSearch(gameState, gameState.getAgentState(self.index).getPosition(), [a], self.notGo2(gameState))[0]
+        if gameState.getAgentState(self.index).numCarrying ==0:
+            return self.eatDots(gameState)
         else:
             if len(way) == 0:
                 return Directions.STOP
