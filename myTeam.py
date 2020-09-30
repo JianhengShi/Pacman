@@ -75,7 +75,7 @@ class Agent(CaptureAgent):
         if len(self.pos) == self.stuckThreshold and self.ifStuck():
             output = self.breaktie(gameState)
         elif self.ifCatch(gameState):
-            output = self.eatDots(gameState)
+            output = self.catch(gameState)
         else:
             # If the agent is ghost, go back to offense
             if not gameState.getAgentState(self.index).isPacman:
@@ -165,7 +165,7 @@ class Agent(CaptureAgent):
         for i in self.enemyPIndex(gameState):
             a += self.getMazeDistance(gameState.getAgentState(self.index).getPosition(), gameState.getAgentState(i).getPosition())
             b += self.getMazeDistance(gameState.getAgentState(self.anotherIndex(gameState)).getPosition(), gameState.getAgentState(i).getPosition())
-        if a < b:
+        if a < b and a<=1:
             return True
         else:
             return False
@@ -258,14 +258,16 @@ class Agent(CaptureAgent):
             if out == out2 and out_val > out2_val and len(dic3) >=2:
                 out = sorted(dic3.items(), key=operator.itemgetter(1))[1][0]
             
-            if len(self.getDots(gameState)) <= 4 and out_val > out2_val:
+            
+            '''
+            if len(self.getDots(gameState)) <= 3 and out_val > out2_val:
                 if gameState.getAgentState(self.index).numCarrying > 0:
                     
                     return self.goHome(gameState)
                 else:
                     
                     return self.catch(gameState)
-        
+            '''
         return self.aStarSearch(gameState, gameState.getAgentState(self.index).getPosition(), [out], self.notGo(gameState))[0]
 
     def goHome(self, gameState):
