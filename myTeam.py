@@ -78,77 +78,119 @@ class OffensiveAgent(CaptureAgent):
     '''
     Your initialization code goes here, if you need any.
     '''
-    allActions = [Directions.WEST,Directions.NORTH,Directions.EAST,Directions.SOUTH,Directions.STOP]
-    featureKeys = ['score', 'distanceToFood', 'foodNotEaten', 'ghostInRange']
-    self.features = self.initFeatures(allActions, featureKeys)
+    self.allActions = [Directions.WEST,Directions.NORTH,Directions.EAST,Directions.SOUTH,Directions.STOP]
+    self.featureKeys = ['distanceToFood', 'foodToEat', 'ghostInRange']
     # print(self.features)
-    self.weights = self.initWeights(allActions, featureKeys)
-    self.reward = None
+    self.weights = self.initWeights(self.allActions, self.featureKeys)
+    # self.reward = 0
+    # self.actionTaken = None
+    self.alfa = 0.5
+    self.gamma = 0.9
+    self.Q = 0
+    self.QsPrime = 0
+    self.spl = getSpl(gameState, self.red)
+    self.width, self.height = gameState.getWalls().width, gameState.getWalls().height
     # print(self.weights)  
 
   def chooseAction(self, gameState):
-    state = gameState
-    legalActions = state.getLegalActions(self.index)
+    state = gameState    
+    legalActions = state.getLegalActions(self.index)  
     successors = []
     for legalAction in legalActions:
       successors.append((legalAction, self.getSuccessor(state, legalAction))) 
-    self.updateFeatureValues(successors)
-    OptiAct = self.computeQ(legalActions)
-    print("choose action")
-    self.reward = self.calReward(state, successors)
-    print(self.reward)
-    return OptiAct
+    print("\ncurrent pos", state.getAgentState(self.index).getPosition())
+    features = self.getFeatureValues(state, successors)
+    print("current state features", features)
+    optiAct, self.Q = self.computeQ(features, legalActions)
+    print("action to take", optiAct)
 
-  def calReward(self,state,successors):
-    reward = util.Counter()
-    for action, successor in successors:
-      print(action)
-      reward[action] = -1
-      rewardForScore = (successor.getScore() - state.getScore()) * 10 
-      # print("rewardForScore:", rewardForScore)
-      rewardForDisToFood = (self.getMinDisToFood(successor) - self.getMinDisToFood(state)) * (-1)
-      # print("rewardForDisToFood:", rewardForDisToFood)
-      rewardForFoodNotEaten = (self.getFoodNotEaten(successor) - self.getFoodNotEaten(state)) * (-2)
-      # print("rewardForFoodNotEaten:", rewardForFoodNotEaten)
-      print( )
-      rewardForGhostInRange = (len(self.getGPosition(successor)) - len(self.getGPosition(state))) * (-10)
-      # print("rewardForGhostInRange:", rewardForGhostInRange)
-      # print(self.getGPosition(state))
-      # print(self.getGPosition(successor))
-      print("rewardForGhostInRange:", rewardForGhostInRange)
-      total = rewardForScore + rewardForDisToFood + rewardForFoodNotEaten + rewardForGhostInRange
-      reward[action] += total
+    successor = self.getSuccessor(state, optiAct)
+    print("successor of optimal action", optiAct)
+    reward = self.calReward(state, optiAct)
+    print("reward", reward)
+    self.updateWeight(state, optiAct, successor, reward, features) 
+    return optiAct
+
+  def updateWeight(self, state, action, successor, reward, features):
+    print("weights before update", self.weights)
+    legalActions = successor.getLegalActions(self.index)   
+    successors = []
+    for legalAction in legalActions:
+      successors.append((legalAction, self.getSuccessor(successor, legalAction))) 
+    successorFeature = self.getFeatureValues(successor, successors)
+    _ , Qsuccessor = self.computeQ(successorFeature, legalActions)
+
+    for feature in self.weights[action]:
+      oldW = self.weights[action][feature]
+      if feature == 'ghostInRange':
+        print(feature, features[action][feature])
+      self.weights[action][feature] = oldW + self.alfa * (reward + self.gamma * Qsuccessor - self.Q) * features[action][feature]
+    print("weights after update", self.weights)
+
+  def calReward(self,state,action):
+    reward = 0
+    successor = self.getSuccessor(state, action)
+    if successor.getAgentState(self.index).getPosition() in self.getFood(state).asList():
+      reward += 2
+      # print("eat bean reward")
+    if successor.getAgentState(self.index).getPosition() in self.getGPosition(successor):
+      reward -= 5
+      print("ghost reward")
     return reward
 
-  def updateFeatureValues(self, successors):
+  def getFeatureValues(self, state, successors):
+    features = self.initFeatures(self.allActions, self.featureKeys)
     for action, successor in successors:
-      if successor.isOnRedTeam(self.index):
-        self.features[action]['score'] = self.getScore(successor)
+      features[action]['distanceToFood'] = -self.getMinDisToFood(successor)
+      gpos = []
+      if self.red:
+        gpos = self.enemyGPosition(state)
+        print(gpos)
+      if not self.red and len(self.enemyGPosition(state)) != 0:
+        for ghost in self.getGPosition(state):
+          gx, gy = self.width - ghost[0], self.height - ghost[1]
+          gpos.append((gx,gy))
+          print(self.enemyGPosition(state))
+      # gdis = []
+      # for p in gpos:
+      #   print(p)
+      #   dis = self.getMazeDistance(successor.getAgentState(self.index).getPosition(), p)
+      #   gdis.append(dis)
+      if successor.getAgentState(self.index).getPosition() not in gpos:
+        # print("next pos", successor.getAgentState(self.index).getPosition() )
+        # print("safe")
+        features[action]['ghostInRange'] = 0
+        features[action]['foodToEat'] = self.getFoodNotEaten(state, successor)
       else:
-        self.features[action]['score'] = -self.getScore(successor)
-      self.features[action]['distanceToFood'] = -self.getMinDisToFood(successor)
-      self.features[action]['foodNotEaten'] = -self.getFoodNotEaten(successor)
-      self.features[action]['ghostInRange'] = -len(self.getGPosition(successor))
+        # print("next pos", successor.getAgentState(self.index).getPosition() )
+        # print("Ghost is here!")
+        features[action]['ghostInRange'] = min([self.getMazeDistance(successor.getAgentState(self.index).getPosition(), ghost) for ghost in self.enemyGPosition(state)])/5
+        features[action]['foodToEat'] = 0
+    # print("features", features)
+    return features
 
   def getMinDisToFood(self,state):
     foodList = self.getFood(state).asList() 
     if len(foodList) > 0: 
       pos = state.getAgentState(self.index).getPosition()
       minDistance = min([self.getMazeDistance(pos, food) for food in foodList])
-    return minDistance    
+    return minDistance/(self.height * self.width)
   
-  def getFoodNotEaten(self,state):
-    foodNum = len(self.getFood(state).asList())
-    return foodNum
+  def getFoodNotEaten(self,state,successor):
+    isFood = 0
+    if successor.getAgentState(self.index).getPosition() in self.getFood(state).asList():
+      isFood = 1
+    return isFood
  
-  def computeQ(self,legalActions):
+  def computeQ(self,features, legalActions):
     Qs = util.Counter()
     for action in legalActions:
       value = 0
-      for feature in self.features[action].keys():
-        value += self.features[action][feature] * self.weights[action][feature]
+      for feature in features[action].keys():
+        value += features[action][feature] * self.weights[action][feature]
       Qs[action] = value
-    return Qs.argMax()
+      # print(action, value)
+    return (Qs.argMax(),Qs[Qs.argMax()])
 
   def getSuccessor(self, state, action):
     """
@@ -162,7 +204,7 @@ class OffensiveAgent(CaptureAgent):
     else:
       return successor
 
-  def initFeatures(self,allActions, featureKeys):
+  def initFeatures(self, allActions, featureKeys):
     features = util.Counter()
     for action in allActions:
       features[action] = {}
@@ -170,7 +212,7 @@ class OffensiveAgent(CaptureAgent):
         features[action][key] = 0
     return features
 
-  def initWeights(self,allActions,featureKeys):
+  def initWeights(self, allActions,featureKeys):
     weights = util.Counter()
     for action in allActions:
       weights[action] = {}
@@ -184,3 +226,164 @@ class OffensiveAgent(CaptureAgent):
       if state.getAgentPosition(i) is not None:
         ghostsPos.append(state.getAgentPosition(i))
     return ghostsPos
+
+  def enemyPIndex(self, gameState):
+    output = []
+    for i in self.enemyPosition(gameState):
+        if gameState.getAgentState(i).isPacman:
+            output.append(i)
+    return output
+
+  def enemyGIndex(self, gameState):
+    output = []
+    for i in self.enemyPosition(gameState):
+        if not gameState.getAgentState(i).isPacman and gameState.getAgentState(i).scaredTimer<=5:
+            output.append(i)
+    return output
+
+  def enemyPosition(self, gameState):
+    lis = []
+    if gameState.getAgentPosition(self.getOpponents(gameState)[0]) is not None:
+        lis.append(self.getOpponents(gameState)[0])
+    if gameState.getAgentPosition(self.getOpponents(gameState)[1]) is not None:
+        lis.append(self.getOpponents(gameState)[1])
+    return lis
+
+  def enemyGPosition(self, gameState):
+    out = []
+    for i in self.enemyGIndex(gameState):
+        out.append(gameState.getAgentState(i).getPosition())
+    return out
+
+  def enemyPPosition(self, gameState):
+    out = []
+    for i in self.enemyPIndex(gameState):
+        out.append(gameState.getAgentState(i).getPosition())
+    return out
+
+  def enemyPIndex(self, gameState):
+    output = []
+    for i in self.enemyPosition(gameState):
+        if gameState.getAgentState(i).isPacman:
+            output.append(i)
+    return output
+
+  def notGo(self, gameState):
+    output = []
+    output=self.enemyGPosition(gameState)
+    for i in self.enemyGPosition(gameState):
+        output=output+list(getAroundPositions(gameState, i))
+        if i in getOppoLine(gameState, self.red):  
+            for j in getAroundPositions(gameState, i):
+                if j in getMyLine(gameState, self.red) and gameState.getAgentState(self.index).scaredTimer == 0:
+                    output.remove(j)
+        if self.getMazeDistance(i, gameState.getAgentState(self.index).getPosition())<=5:
+            output=output+list(self.spl[2])
+            output=output+list(self.spl[3])
+
+    if gameState.getAgentState(self.index).scaredTimer > 0:
+        output=output+self.enemyPPosition(gameState)
+        for k in self.enemyPPosition(gameState):
+            output=output+list(getAroundPositions(gameState, k))
+    return output
+
+def getAroundPositions(gameState, pos):
+  list1 = [(int(pos[0])-1,int(pos[1])), (int(pos[0])+1,int(pos[1])), (int(pos[0]),int(pos[1]+1)), (int(pos[0]),int(pos[1]-1))]
+  set1 = set(list1)
+  for i in range(len(list1)):
+      a, b = list1[i]
+      if gameState.hasWall(a,b):
+          set1.remove((a,b))
+  return set1
+
+def getOppoLine(gameState, red):
+  a = gameState.data.layout.width // 2
+  if not red:
+      a = a - 1
+  ls = []
+  for y in range(1, gameState.data.layout.height):
+      if not gameState.hasWall(a, y):
+          ls.append((a, y))
+  return ls
+
+def getMyLine(gameState, red):
+  a = gameState.data.layout.width // 2
+  if red:
+      a= a - 1
+  ls = []
+  for y in range(1, gameState.data.layout.height):
+      if not gameState.hasWall(a, y):
+          ls.append((a, y))
+  return ls
+
+def getSpl(gameState, red):
+  # one half of layout
+  list1 = []
+  map1 = {}
+  target1 = set() # dead ends which only have one legal adjacent position but walls
+  for x in range(1,gameState.data.layout.width // 2):
+      for y in range(1,gameState.data.layout.height):
+          if not gameState.hasWall(x, y):
+              map1[(x, y)] = getAroundPositions(gameState, (x, y))
+              if len(getAroundPositions(gameState, (x, y)))==1 :
+                  target1.add((x, y))
+              else:
+                  list1.append((x, y))
+  target2 = set() # positions whose all adjacent positions are dead ends
+  a = len(list1)
+  b = 0
+  while a != b:
+      a = len(list1)
+      lis1 = list1.copy()
+      for i in lis1:
+          if len(map1[i]) >= 2:
+              c = 0
+              for j in map1[i]:
+                  if (j in target1) or (j in target2):
+                      c += 1
+              if c >= (len(map1[i]) - 1):
+                  list1.remove(i)
+                  target2.add(i)
+      b= len(list1)
+  # another half of layout
+  list2 = []
+  map2 = {}
+  target3 = set() # dead ends which only have one legal adjacent position but walls
+  for x in range(gameState.data.layout.width // 2,gameState.data.layout.width):
+      for y in range(1,gameState.data.layout.height):
+          if not gameState.hasWall(x, y):
+              map2[(x, y)] = getAroundPositions(gameState, (x, y))
+              if len(getAroundPositions(gameState, (x, y)))==1:
+                  target3.add((x, y))
+              else:
+                  list2.append((x, y))
+  target4 = set() # positions whose all adjacent positions are dead ends
+  d = len(list2)
+  e = 0
+  while d != e:
+      d = len(list2)
+      lis2 = list2.copy()
+      for i in lis2:
+          if len(map2[i]) >= 2:
+              f = 0
+              for j in map2[i]:
+                  if (j in target3) or (j in target4):
+                      f += 1
+              if f >= (len(map2[i]) - 1):
+                  list2.remove(i)
+                  target4.add(i)
+      e = len(list2)
+  return_list = []
+  if red:
+      return_list.append(target1)
+      return_list.append(target2)
+      return_list.append(target3)
+      return_list.append(target4)
+  else:
+      return_list.append(target3)
+      return_list.append(target4)
+      return_list.append(target1)
+      return_list.append(target2)
+  return return_list
+
+    
