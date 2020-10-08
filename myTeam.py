@@ -142,28 +142,29 @@ class OffensiveAgent(CaptureAgent):
     features = self.initFeatures(self.allActions, self.featureKeys)
     for action, successor in successors:
       features[action]['distanceToFood'] = -self.getMinDisToFood(successor)
-      gpos = []
-      if self.red:
-        gpos = self.enemyGPosition(state)
-        print(gpos)
-      if not self.red and len(self.enemyGPosition(state)) != 0:
-        for ghost in self.getGPosition(state):
-          gx, gy = self.width - ghost[0], self.height - ghost[1]
-          gpos.append((gx,gy))
-          print(self.enemyGPosition(state))
+      # gpos = []
+      # if self.red:
+      #   gpos = self.enemyGPosition(state)
+      #   print(gpos)
+      # if not self.red and len(self.enemyGPosition(state)) != 0:
+      #   for ghost in self.getGPosition(state):
+      #     gx, gy = self.width - ghost[0], self.height - ghost[1]
+      #     gpos.append((gx,gy))
+      #     print(self.enemyGPosition(state))
       # gdis = []
       # for p in gpos:
       #   print(p)
       #   dis = self.getMazeDistance(successor.getAgentState(self.index).getPosition(), p)
       #   gdis.append(dis)
-      if successor.getAgentState(self.index).getPosition() not in gpos:
+      print(self.enemyGPosition(state))
+      if not self.enemyGPosition(state):
         # print("next pos", successor.getAgentState(self.index).getPosition() )
-        # print("safe")
+        print("safe")
         features[action]['ghostInRange'] = 0
         features[action]['foodToEat'] = self.getFoodNotEaten(state, successor)
       else:
         # print("next pos", successor.getAgentState(self.index).getPosition() )
-        # print("Ghost is here!")
+        print("Ghost is here!")
         features[action]['ghostInRange'] = min([self.getMazeDistance(successor.getAgentState(self.index).getPosition(), ghost) for ghost in self.enemyGPosition(state)])/5
         features[action]['foodToEat'] = 0
     # print("features", features)
