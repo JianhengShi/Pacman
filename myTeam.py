@@ -87,7 +87,10 @@ class Agent(CaptureAgent):
                     output = self.CapOrHome(gameState)
                 # If eats 18 dots or time is up
                 elif (len(self.getDots(gameState)) <= 2) or (gameState.data.timeleft < 80 and gameState.getAgentState(self.index).numCarrying > 0):
-                    output = self.goHome(gameState)
+                    if not gameState.getAgentState(self.index).isPacman:
+                        return catch(gameState)
+                    else:
+                        output = self.goHome(gameState)
                 # Otherwise, eat dots
                 else:
                     output = self.eatDots(gameState)   
@@ -372,6 +375,27 @@ class Agent(CaptureAgent):
                         return True          
         return False
 
+    def luckyWay(self, gameState):
+        safeAction = []
+        dp = self.notGo2(gameState)
+        legalActions = gameState.getLegalActions(self.index)
+        x, y = gameState.getAgentPosition(self.index)
+        for action in legalActions:
+            dx, dy = Actions.directionToVector(action)
+            nextPos = (int(x+dx), int(y+dy))
+            if nextPos not in dp:  
+                safeAction.append(action)
+        if len(safeAction) != 0:
+            # if self.safeBreakTie > 0:
+            out = random.choice(safeAction)
+                # self.safeBreakTie =- 1
+            # else:
+            #     out = random.choice(legalActions)
+            #     self.safeBreakTie = 2
+        else:
+            out = random.choice(legalActions)
+        return out
+
     def CapOrHome(self, gameState):
         '''
         Return action to go home or to chase capsule.
@@ -396,7 +420,7 @@ class Agent(CaptureAgent):
             return self.eatDots2(gameState)
         else:
             if len(way) == 0:
-                return Directions.STOP
+                return self.luckyWay(gameState)
             else:
                 return way[0]
 
@@ -626,7 +650,7 @@ class Agent(CaptureAgent):
         Return a list of actions of shortest way to go back to our side to unload food.
         最近的回家的路
         '''
-        dp = self.notGo(gameState)
+        dp = self.notGo2(gameState)
         p = gameState.getAgentState(self.index).getPosition()
         line = getMyLine(gameState, self.red)
         way = None
