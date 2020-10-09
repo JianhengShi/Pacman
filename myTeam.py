@@ -140,12 +140,12 @@ class Agent(CaptureAgent):
                 if action != Directions.STOP:  
                     safeAction.append(action)
         if len(safeAction) != 0:
-            if self.safeBreakTie > 0:
-                out = random.choice(safeAction)
-                self.safeBreakTie =- 1
-            else:
-                out = random.choice(legalActions)
-                self.safeBreakTie = 2
+            # if self.safeBreakTie > 0:
+            out = random.choice(safeAction)
+                # self.safeBreakTie =- 1
+            # else:
+            #     out = random.choice(legalActions)
+            #     self.safeBreakTie = 2
         else:
             out = random.choice(legalActions)
         return out
@@ -359,8 +359,8 @@ class Agent(CaptureAgent):
         Return True if this agent is chasing by enemy's Ghost.
         正被追？
         '''
-        for i in self.enemyGIndex(self.state):
-            for j in self.enemyGIndex(gameState):
+        for i in self.enemyGIndex2(self.state):
+            for j in self.enemyGIndex2(gameState):
                 if i == j:
                     if self.ifAtDeadRoute(gameState):
                         '''
@@ -499,6 +499,19 @@ class Agent(CaptureAgent):
         output = []
         for i in self.enemyPosition(gameState):
             if not gameState.getAgentState(i).isPacman and gameState.getAgentState(i).scaredTimer<=5:
+                output.append(i)
+        return output
+
+    def enemyGIndex2(self, gameState):
+        '''
+        Return a list of opponent agents indices if it is nearby us and 
+        it is ghost and it is not scared (or scared time almost done).
+        In a word, which is is a threat to our agents.
+        附近的有威胁的Ghost敌人的index
+        '''
+        output = []
+        for i in self.enemyPosition(gameState):
+            if not gameState.getAgentState(i).isPacman and gameState.getAgentState(i).scaredTimer<=15:
                 output.append(i)
         return output
 
