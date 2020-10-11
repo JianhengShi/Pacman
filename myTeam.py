@@ -71,10 +71,13 @@ class Agent(CaptureAgent):
         Logic of choosing action.
         Strategy that emphasizes offense.
         '''
+       
+        
         # If teh agent is stuck
         if len(self.pos) == self.stuckThreshold and self.ifStuck():
             output = self.breaktie(gameState)
         elif self.ifCatch(gameState):
+            # print(1)
             output = self.catch(gameState)
         else:
             # If the agent is ghost, go back to offense
@@ -93,7 +96,8 @@ class Agent(CaptureAgent):
                         output = self.goHome(gameState)
                 # Otherwise, eat dots
                 else:
-                    output = self.eatDots(gameState)   
+                    output = self.eatDots(gameState)
+        self.my_dots=self.getMyDots(gameState)
         self.state = gameState
         self.updateposhistory(gameState)
         return output
@@ -159,10 +163,11 @@ class Agent(CaptureAgent):
         Return False if it is further or it is a scared Ghost.
         谁近，谁去抓
         '''
-        if len(self.getDots(gameState)) <= 2 and gameState.getAgentState(self.index).numCarrying == 0:
-            return True
         if gameState.getAgentState(self.index).scaredTimer > 0:
             return False
+        if self.getScore(gameState) > 0 and gameState.getAgentState(self.index).numCarrying == 0:
+            return True
+        
         a = 0
         b = 0
         for i in self.enemyPIndex(gameState):
@@ -195,8 +200,36 @@ class Agent(CaptureAgent):
                     b = len(path)
                     a = path    
         if a is None or len(a) == 0:
-            return Directions.STOP
+            # print(len(self.getMyDots(gameState)))
+            # print(len(self.my_dots))
+            eatenFood = list(set(self.my_dots)-set(self.getMyDots(gameState)))
+            # eatenFood = self.differ(self.getMyDots(gameState), self.my_dots)
+            # print(eatenFood)
+            if len(eatenFood) != 0:
+                return self.aStarSearch(gameState, gameState.getAgentState(self.index).getPosition(), [eatenFood[0]], [])[0]
+            else:
+                c = None
+                d=9999999
+                for dot in self.getMyDots(gameState):
+                    path = self.aStarSearch(gameState, gameState.getAgentState(self.index).getPosition(), [dot], [])
+                    if path is None:
+                        continue
+                    if len(path) < d:
+                        d = len(path)
+                        c = path
+                if len(c)==0:
+                    return Directions.STOP
+                else:
+                    return c[0]
         return a[0]
+
+    # def differ(self, list1, list2):
+    #     if list1 == list2:
+    #         return []
+    #     if (len(list1) > len(list2)):
+    #         return list(set(list1) - set(list2))
+    #     else:
+    #         return list(set(list1) - set(list2))
 
     def eatDots(self, gameState):
         '''
