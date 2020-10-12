@@ -56,6 +56,7 @@ class Agent(CaptureAgent):
         Initialize state.
         '''
         CaptureAgent.registerInitialState(self, gameState)
+        self.def_target = getMyLine(gameState, self.red)[int(len(getMyLine(gameState, self.red))/2)]
         self.state = gameState
         self.go_home = False
         self.my_dots = self.getMyDots(gameState)
@@ -72,14 +73,14 @@ class Agent(CaptureAgent):
         Strategy that emphasizes offense.
         '''
        
-        
         # If teh agent is stuck
-        if len(self.pos) == self.stuckThreshold and self.ifStuck():
-            output = self.breaktie(gameState)
-        elif self.ifCatch(gameState):
+        
+        if self.ifCatch(gameState):
             # print(1)
             output = self.catch(gameState)
         else:
+            if len(self.pos) == self.stuckThreshold and self.ifStuck():
+                output = self.breaktie(gameState)
             # If the agent is ghost, go back to offense
             if not gameState.getAgentState(self.index).isPacman:
                 output = self.eatDots(gameState)
@@ -165,7 +166,7 @@ class Agent(CaptureAgent):
         '''
         if gameState.getAgentState(self.index).scaredTimer > 0:
             return False
-        if self.getScore(gameState) > 0 and gameState.getAgentState(self.index).numCarrying == 0:
+        if self.getScore(gameState) >= 7 and gameState.getAgentState(self.index).numCarrying == 0:
             return True
         
         a = 0
@@ -206,12 +207,18 @@ class Agent(CaptureAgent):
             # eatenFood = self.differ(self.getMyDots(gameState), self.my_dots)
             # print(eatenFood)
             if len(eatenFood) != 0:
-                return self.aStarSearch(gameState, gameState.getAgentState(self.index).getPosition(), [eatenFood[0]], [])[0]
+                self.def_target=eatenFood[0]
+                path = self.aStarSearch(gameState, gameState.getAgentState(self.index).getPosition(), [eatenFood[0]], self.notGo2(gameState))
+                if len(path)>0:
+                    return path[0]
             else:
+                path = self.aStarSearch(gameState, gameState.getAgentState(self.index).getPosition(), [self.def_target], self.notGo2(gameState))
+                if len(path)>0:
+                    return path[0]
                 c = None
                 d=9999999
                 for dot in self.getMyDots(gameState):
-                    path = self.aStarSearch(gameState, gameState.getAgentState(self.index).getPosition(), [dot], [])
+                    path = self.aStarSearch(gameState, gameState.getAgentState(self.index).getPosition(), [dot], self.notGo2(gameState))
                     if path is None:
                         continue
                     if len(path) < d:
