@@ -82,7 +82,7 @@ class Agent(CaptureAgent):
             if len(self.pos) == self.stuckThreshold and self.ifStuck():
                 output = self.breaktie(gameState)
             # If the agent is ghost, go back to offense
-            if not gameState.getAgentState(self.index).isPacman:
+            elif not gameState.getAgentState(self.index).isPacman:
                 output = self.eatDots(gameState)
             # If the agent is Pacman
             else:
@@ -166,7 +166,7 @@ class Agent(CaptureAgent):
         '''
         if gameState.getAgentState(self.index).scaredTimer > 0:
             return False
-        if self.getScore(gameState) >= 7 and gameState.getAgentState(self.index).numCarrying == 0:
+        if len(self.getDots(gameState)) <= 3 and self.getScore(gameState) >0 and gameState.getAgentState(self.index).numCarrying == 0:
             return True
         
         a = 0
@@ -213,7 +213,7 @@ class Agent(CaptureAgent):
                     return path[0]
             else:
                 path = self.aStarSearch(gameState, gameState.getAgentState(self.index).getPosition(), [self.def_target], self.notGo2(gameState))
-                if len(path)>0:
+                if path is not None:
                     return path[0]
                 c = None
                 d=9999999
@@ -388,6 +388,82 @@ class Agent(CaptureAgent):
             '''
         return self.aStarSearch(gameState, gameState.getAgentState(self.index).getPosition(), [out], self.notGo(gameState))[0]
 
+    def eatDots3(self, gameState):
+        '''
+        Return an action to eat dots.
+        Logistic is: go to the nearest food, if teammate goes to that position either, 
+        change to chase the third nearest food.
+        去最近的食物，如果队友也去，那么去第三近的
+        '''
+        if self.go_home:
+            return self.goHome(gameState)
+        ls = []
+        if len(self.getDots(gameState)) > 15:
+            dic = dict()
+            for i in self.getDots(gameState):
+                dic.update({i: self.getMazeDistance(gameState.getAgentState(self.index).getPosition(), i)})
+            ls1 = []
+            for i in sorted(dic.items(), key=operator.itemgetter(1)):
+                ls1.append(i[0])
+            ls = ls1[0: 15]
+        else:
+            ls = self.getDots(gameState)
+        dic3 = dict()
+        for i in ls:
+            if self.aStarSearch(gameState, gameState.getAgentState(self.index).getPosition(), [i], self.notGo(gameState)) is not None and len(self.homeWay2(gameState, i))>0:
+                dic3.update({i: len(self.aStarSearch(gameState, gameState.getAgentState(self.index).getPosition(), [i], self.notGo(gameState)))})
+            else:
+                continue
+        
+        if len(dic3) == 0:
+            
+            return None
+        out = sorted(dic3.items(), key=operator.itemgetter(1))[0][0]
+        out_val = sorted(dic3.items(), key=operator.itemgetter(1))[0][1]
+
+        dic4 = dict()
+        ls2 = []
+        if len(self.getDots(gameState)) > 15:
+            dic = dict()
+            for i in self.getDots(gameState):
+                dic.update({i: self.getMazeDistance(gameState.getAgentState(self.anotherIndex(gameState)).getPosition(), i)})
+            ls1 = []
+            for i in sorted(dic.items(), key=operator.itemgetter(1)):
+                ls1.append(i[0])
+            ls2 = ls1[0: 15]
+        else:
+            ls2 = self.getDots(gameState)
+
+        for eat in ls2:
+            path = self.aStarSearch(gameState, gameState.getAgentState(self.anotherIndex(gameState)).getPosition(), [eat], self.notGo(gameState))
+            if path is None:
+                continue
+            dic4.update({eat: len(path)})
+        if len(dic4) != 0:
+            out2 = sorted(dic4.items(), key=operator.itemgetter(1))[0][0]
+            out2_val = sorted(dic4.items(), key=operator.itemgetter(1))[0][1]
+            '''
+            if out == out2 and out_val > out2_val and len(dic3) > int(len(self.my_dots)*2/3):
+                out = sorted(dic3.items(), key=operator.itemgetter(1))[1][0]
+            if out == out2 and out_val > out2_val and len(dic3) <= int(len(self.my_dots)*2/3): 
+                out = sorted(dic3.items(), key=operator.itemgetter(1))[len(dic3)-1][0]
+            
+            '''
+            if out == out2 and out_val > out2_val and len(dic3) >=2:
+                out = sorted(dic3.items(), key=operator.itemgetter(1))[1][0]
+            
+            
+            '''
+            if len(self.getDots(gameState)) <= 3 and out_val > out2_val:
+                if gameState.getAgentState(self.index).numCarrying > 0:
+                    
+                    return self.goHome(gameState)
+                else:
+                    
+                    return self.catch(gameState)
+            '''
+        return self.aStarSearch(gameState, gameState.getAgentState(self.index).getPosition(), [out], self.notGo(gameState))[0]
+
     def goHome(self, gameState):
         '''
         Return an action that leads the agent home.
@@ -442,6 +518,9 @@ class Agent(CaptureAgent):
         被追去吃药丸或回家
         '''
         way = self.homeWay(gameState)
+        way2=self.eatDots3(gameState)
+        if way2 is not None:
+            return way2
         # when finish eating 18 dots or time is up, go home
         if len(way) > 0 and ((len(self.getDots(gameState)) <= 2) or(gameState.data.timeleft < 80 and gameState.getAgentState(self.index).numCarrying > 0) or (len(way) <= 5 and gameState.getAgentState(self.index).numCarrying >= 4 and not self.oppoPac(gameState))):
             return way[0]
@@ -697,6 +776,24 @@ class Agent(CaptureAgent):
         a = 9999999
         for i in line:
             path = self.aStarSearch(gameState, p, [i], dp)
+            if path is not None and len(path) < a:
+                a = len(path)
+                way = path
+        if way is None:
+            return []
+        return way
+
+    def homeWay2(self, gameState, position):
+        '''
+        Return a list of actions of shortest way to go back to our side to unload food.
+        最近的回家的路
+        '''
+        dp = self.notGo2(gameState)
+        line = getMyLine(gameState, self.red)
+        way = None
+        a = 9999999
+        for i in line:
+            path = self.aStarSearch(gameState, position, [i], dp)
             if path is not None and len(path) < a:
                 a = len(path)
                 way = path
