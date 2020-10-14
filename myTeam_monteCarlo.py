@@ -84,9 +84,12 @@ class Agent(CaptureAgent):
             else:
                 # If under chasing, run away with MCTS
                 if self.ifChase(gameState):
-                    rootNode = Node(gameState,self,None,None, self.enemyGPosition(gameState), getMyLine(gameState, gameState.isOnRedTeam(self.index)))
-                    print ('run away with MCTS')
-                    output = MCTS(rootNode)
+                    if len(self.getDots(gameState)) > 0:
+                        rootNode = Node(gameState,self,None,None, self.enemyGPosition(gameState), getMyLine(gameState, gameState.isOnRedTeam(self.index)))
+                        print ('run away with MCTS')
+                        output = MCTS(rootNode)
+                    else:
+                        output = self.goHome(gameState)
                 # If eats 18 dots or time is up
                 elif (len(self.getDots(gameState)) <= 2) or (gameState.data.timeleft < 80 and gameState.getAgentState(self.index).numCarrying > 0):
                     if not gameState.getAgentState(self.index).isPacman:
@@ -759,13 +762,9 @@ def MCTS(node):
     timeLimit = 0.5
     start = time.time()
     while(time.time()-start < timeLimit):
-        
         nodeForSimulation = getExpandedNode(node) #selection and expand
-
         reward = getReward(nodeForSimulation)
-
         backpropagation(nodeForSimulation,reward)
-    
     return getBestChild(node).action
 
 def getFeaturesAttack(agent,node):
