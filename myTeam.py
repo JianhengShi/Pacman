@@ -80,7 +80,7 @@ class OffensiveAgent(CaptureAgent):
     '''
 
     self.allActions = [Directions.WEST,Directions.NORTH,Directions.EAST,Directions.SOUTH,Directions.STOP]
-    self.featureKeys = ['distanceToFood', 'foodToEat', 'disNotGo', "disPac"]
+    self.featureKeys = ['distanceToFood', 'foodToEat', 'disNotGo', "disPac", "disCap"]
     # print(self.features)
     self.weights = self.initWeights(self.allActions, self.featureKeys)
     # self.weights ={'West': {'distanceToFood': 1.0448083829761436, 'foodToEat': 1.0, 'ghostInRange': -2.972108795643406}, 'North': {'distanceToFood': 1.048234867461356, 'foodToEat': 1.0, 'ghostInRange': -4.905922613102293}, 'East': {'distanceToFood': 0.9992496152265813, 'foodToEat': 1.0, 'ghostInRange': 0.8780595764113851}, 'South': {'distanceToFood': 1.0886294360444848, 'foodToEat': 1.501473430614396, 'ghostInRange': -8.783971438723631}, 'Stop': {'distanceToFood': 1.0044728576407824, 'foodToEat': 1.0, 'ghostInRange': 0.011546752765986346}}
@@ -88,22 +88,18 @@ class OffensiveAgent(CaptureAgent):
     # self.actionTaken = None
     self.alfa = 0.5
     self.gamma = 0.9
-    self.epsilon = 0.05
+    self.epsilon = 0.01
     self.Q = 0
     self.QsPrime = 0
     self.spl = getSpl(gameState, self.red)
-    self.width, self.height = gameState.getWalls().width, gameState.getWalls().height    
-    print(self.spl)
+    self.width, self.height = gameState.getWalls().width, gameState.getWalls().height   
+    self.mySide = getMyLine(gameState, self.red) 
+    print(self.mySide)
 
   def chooseAction(self, gameState):
     state = gameState    
-    # if state.data.timeleft < 1000 :
-    #   record = open("record.txt","a")
-    #   record.write(json.dumps(self.weights))
-    #   record.close() 
     legalActions = state.getLegalActions(self.index)  
     if util.flipCoin(self.epsilon):
-      print("exploring")
       optiAct = random.choice(legalActions)
     else:
       successors = []
@@ -124,7 +120,7 @@ class OffensiveAgent(CaptureAgent):
     return optiAct
 
   def updateWeight(self, state, action, successor, reward, features):
-    print("weights before update", self.weights)
+    # print("weights before update", self.weights)
     legalActions = successor.getLegalActions(self.index)   
     successors = []
     for legalAction in legalActions:
@@ -137,7 +133,7 @@ class OffensiveAgent(CaptureAgent):
       # if feature == 'ghostInRange':
         # print(feature, features[action][feature])
       self.weights[action][feature] = oldW + self.alfa * (reward + self.gamma * Qsuccessor - self.Q) * features[action][feature]
-    print("weights after update", self.weights)
+    # print("weights after update", self.weights)
 
   def calReward(self,state,action):
     reward = 0
@@ -145,36 +141,53 @@ class OffensiveAgent(CaptureAgent):
     if successor.getAgentState(self.index).getPosition() in self.getFood(state).asList():
       reward += 4
       # print("eat bean reward")
-    if successor.getAgentState(self.index).getPosition() in self.getGPosition(successor):
-      reward -= 3
     if successor.getAgentState(self.index).getPosition() in self.notGo(state):
-      reward -= 1
       # print("ghost reward")
+      reward -= 3
+    if not successor.getAgentState(self.index).isPacman and successor.getAgentState(self.index).getPosition() == self.getPacPos(state):
+      reward += 4
     return reward
 
   def getFeatureValues(self, state, successors):
     features = self.initFeatures(self.allActions, self.featureKeys)
     for action, successor in successors:
-      features[action]['distanceToFood'] = -self.getMinDisToFood(successor)
-      # print(self.enemyGPosition(state))
-      if state.getAgentState(self.index).isPacman and not self.enemyGPosition(state):
-        # print("next pos", successor.getAgentState(self.index).getPosition() )
-        # print("safe")
-        # features[action]['ghostInRange'] = 0
+      if state.getAgentState(self.index).isPacman or state.getAgentState(self.index).getPosition() in self.mySide:
+        features[action]['disPac'] = 0
+        features[action]['disNotGo'] = self.getMinDisToNotGo(successor)
+        if not self.enemyGPosition(state):
+          features[action]['foodToEat'] = self.getFoodNotEaten(state, successor)
+          features[action]['distanceToFood'] = -self.getMinDisToFood(successor)
+          # features[action]['disNotGo'] = 0
+        else:
+          features[action]['foodToEat'] = 0
+          features[action]['distanceToFood'] = 0
+          # features[action]['disNotGo'] = self.getMinDisToNotGo(successor)
+      else:
         features[action]['foodToEat'] = self.getFoodNotEaten(state, successor)
-      else:
-        # print("next pos", successor.getAgentState(self.index).getPosition() )
-        # print("Ghost is here!")
-        # features[action]['ghostInRange'] = min([self.getMazeDistance(successor.getAgentState(self.index).getPosition(), ghost) for ghost in self.enemyGPosition(state)])/5
-        features[action]['foodToEat'] = 0
-      if state.getAgentState(self.index).isPacman and len(self.notGo(state)) != 0:
-        features[action]['disNotGo'] = min([self.getMazeDistance(successor.getAgentState(self.index).getPosition(),loc) for loc in self.notGo(state)])/(self.height * self.width)
-      else:
+        features[action]['distanceToFood'] = -self.getMinDisToFood(successor)
         features[action]['disNotGo'] = 0
-      # print(min([self.getMazeDistance(successor.getAgentState(self.index).getPosition(),loc) for loc in self.spl]))
-      print( self.notGo(state))
-    # print("features", features)
+        features[action]['disPac'] = -self.getMinDisToPac(successor)
     return features
+  
+  def getPacPos(self, state):
+    oppoPos = []
+    for oppo in self.getOpponents(state):
+      if state.getAgentState(oppo).isPacman and state.getAgentState(oppo).getPosition() is not None:
+        oppoPos.append(state.getAgentState(oppo).getPosition())
+    return oppoPos
+
+  def getMinDisToPac(self, state):
+    oppoPos = self.getPacPos(state)
+    if len(oppoPos) == 0:
+      return 0
+    else:
+      return min([self.getMazeDistance(state.getAgentState(self.index).getPosition(), pos) for pos in oppoPos])/(self.height * self.width)
+
+  def getMinDisToNotGo(self, state):
+    if len(self.notGo(state)) == 0:
+      return 0
+    else:
+      return min([self.getMazeDistance(state.getAgentState(self.index).getPosition(), loc) for loc in self.notGo(state)])/(self.height * self.width)
 
   def getMinDisToFood(self,state):
     foodList = self.getFood(state).asList() 
