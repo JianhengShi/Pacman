@@ -80,43 +80,41 @@ class OffensiveAgent(CaptureAgent):
     '''
 
     self.allActions = [Directions.WEST,Directions.NORTH,Directions.EAST,Directions.SOUTH,Directions.STOP]
-    self.featureKeys = ['distanceToFood', 'foodToEat', 'disNotGo', "disPac", "disCap"]
-    # print(self.features)
+    self.featureKeys = ['distanceToFood', 'foodToEat', 'disNotGo', "disPac", "disCap", "toScore"]
     self.weights = self.initWeights(self.allActions, self.featureKeys)
-    # self.weights ={'West': {'distanceToFood': 1.0448083829761436, 'foodToEat': 1.0, 'ghostInRange': -2.972108795643406}, 'North': {'distanceToFood': 1.048234867461356, 'foodToEat': 1.0, 'ghostInRange': -4.905922613102293}, 'East': {'distanceToFood': 0.9992496152265813, 'foodToEat': 1.0, 'ghostInRange': 0.8780595764113851}, 'South': {'distanceToFood': 1.0886294360444848, 'foodToEat': 1.501473430614396, 'ghostInRange': -8.783971438723631}, 'Stop': {'distanceToFood': 1.0044728576407824, 'foodToEat': 1.0, 'ghostInRange': 0.011546752765986346}}
-    # self.reward = 0
-    # self.actionTaken = None
+    # self.weights = {'West': {'distanceToFood': 0.9406665860006791, 'foodToEat': 3.9088003805766056, 'disNotGo': 0.9945154454794762, 'disPac': 0.9995443531928199, 'disCap': 1.0000229100779048}, 'North': {'distanceToFood': 0.9453480231890611, 'foodToEat': 6.10108812206923, 'disNotGo': 1.000139831436916, 'disPac': 0.9983759119959504, 'disCap': 0.9996872288809935}, 'East': {'distanceToFood': 0.9982869135825846, 'foodToEat': 5.160526090803757, 'disNotGo': 1.058272067063875, 'disPac': 1.0, 'disCap': 0.9999510385832727}, 'South': {'distanceToFood': 0.881661765807159, 'foodToEat': 3.62706243043095, 'disNotGo': 1.4388574376234418, 'disPac': 0.9992938222722776, 'disCap': 0.9804752082222666}, 'Stop': {'distanceToFood': 1.0, 'foodToEat': 1.0, 'disNotGo': 0.9994866641612816, 'disPac': 1.0, 'disCap': 1.0}}
     self.alfa = 0.5
     self.gamma = 0.9
-    self.epsilon = 0.01
+    # self.epsilon = 0.05
     self.Q = 0
     self.QsPrime = 0
     self.spl = getSpl(gameState, self.red)
     self.width, self.height = gameState.getWalls().width, gameState.getWalls().height   
     self.mySide = getMyLine(gameState, self.red) 
+    self.numBeans = len(self.getFood(gameState).asList())
     print(self.mySide)
 
-  def chooseAction(self, gameState):
+  def chooseAction(self, gameState):   
     state = gameState    
-    legalActions = state.getLegalActions(self.index)  
-    if util.flipCoin(self.epsilon):
-      optiAct = random.choice(legalActions)
-    else:
-      successors = []
-      for legalAction in legalActions:
-        successors.append((legalAction, self.getSuccessor(state, legalAction)))   
+    legalActions = state.getLegalActions(self.index) 
+    # if util.flipCoin(self.epsilon):
+    #   optiAct = random.choice(legalActions)
+    # else:
+    successors = []
+    for legalAction in legalActions:
+      successors.append((legalAction, self.getSuccessor(state, legalAction)))   
     
-      # print("\ncurrent pos", state.getAgentState(self.index).getPosition())
-      features = self.getFeatureValues(state, successors)
-      # print("current state features", features)
-      optiAct, self.Q = self.computeQ(features, legalActions)
-      # print("action to take", optiAct)
+    # print("\ncurrent pos", state.getAgentState(self.index).getPosition())
+    features = self.getFeatureValues(state, successors)
+    # print("current state features", features)
+    optiAct, self.Q = self.computeQ(features, legalActions)
+    # print("action to take", optiAct)
 
-      successor = self.getSuccessor(state, optiAct)
-      # print("successor of optimal action", optiAct)
-      reward = self.calReward(state, optiAct)
-      # print("reward", reward)
-      self.updateWeight(state, optiAct, successor, reward, features) 
+    successor = self.getSuccessor(state, optiAct)
+    # print("successor of optimal action", optiAct)
+    reward = self.calReward(state, optiAct)
+    # print("reward", reward)
+    self.updateWeight(state, optiAct, successor, reward, features) 
     return optiAct
 
   def updateWeight(self, state, action, successor, reward, features):
@@ -140,35 +138,79 @@ class OffensiveAgent(CaptureAgent):
     successor = self.getSuccessor(state, action)
     if successor.getAgentState(self.index).getPosition() in self.getFood(state).asList():
       reward += 4
-      # print("eat bean reward")
+      print("eat bean reward")
     if successor.getAgentState(self.index).getPosition() in self.notGo(state):
-      # print("ghost reward")
-      reward -= 3
-    if not successor.getAgentState(self.index).isPacman and successor.getAgentState(self.index).getPosition() == self.getPacPos(state):
-      reward += 4
+      print("close to ghost penalty")
+      reward -= 10
+    if not successor.getAgentState(self.index).isPacman and successor.getAgentState(self.index).getPosition() in self.getPacPos(state):
+      print(successor.getAgentState(self.index).getPosition())
+      print(self.getPacPos(state))
+      print("eat enemy reward")
+      reward += 5
+    if successor.getAgentState(self.index).getPosition() in self.getCapsules(state):
+      print("eat cap reward")
+      reward += 5
+    if state.getAgentState(self.index).numCarrying > 0 and self.gotEaten(successor):
+      print("got eaten penalty", successor.getAgentState(self.index).getPosition())
+      reward -= 10
     return reward
 
+  def gotEaten(self, state):
+    if self.red:
+      if state.getAgentState(self.index).getPosition()[0] < self.mySide[0][0]:
+        print(state.getAgentState(self.index).getPosition())
+        return True
+      else:
+        return False
+    else:
+      if state.getAgentState(self.index).getPosition()[0] > self.mySide[0][0]:
+        print("back?",state.getAgentState(self.index).getPosition()[0])
+        return True
+      else:
+        return False
+        
   def getFeatureValues(self, state, successors):
     features = self.initFeatures(self.allActions, self.featureKeys)
     for action, successor in successors:
-      if state.getAgentState(self.index).isPacman or state.getAgentState(self.index).getPosition() in self.mySide:
+      if len(self.getScaredEnemyPos(state)) != 0:
+        features[action]['disPac'] = -self.getMinDisToPac(successor)
+        features[action]['disCap'] = 0
+        features[action]['foodToEat'] = 0
+        features[action]['distanceToFood'] = 0
+        features[action]['disNotGo'] = 0
+        features[action]["toScore"] = (state.getAgentState(self.index).numCarrying/self.numBeans) * (-state.getAgentState(self.index).getPosition()[0]/self.width)
+        
+      elif state.getAgentState(self.index).isPacman or state.getAgentState(self.index).getPosition() in self.mySide:
         features[action]['disPac'] = 0
         features[action]['disNotGo'] = self.getMinDisToNotGo(successor)
+        features[action]['disCap'] = 0
+        features[action]["toScore"] = (state.getAgentState(self.index).numCarrying/self.numBeans) * (-state.getAgentState(self.index).getPosition()[0]/self.width)
+        print(features[action]["toScore"])
         if not self.enemyGPosition(state):
           features[action]['foodToEat'] = self.getFoodNotEaten(state, successor)
           features[action]['distanceToFood'] = -self.getMinDisToFood(successor)
-          # features[action]['disNotGo'] = 0
         else:
           features[action]['foodToEat'] = 0
           features[action]['distanceToFood'] = 0
-          # features[action]['disNotGo'] = self.getMinDisToNotGo(successor)
+          if self.getDisToCap(state) < 5:
+            features[action]['disCap'] = -self.getDisToCap(state)/(self.height * self.width)
+            # print(self.getCapsules(state))
       else:
         features[action]['foodToEat'] = self.getFoodNotEaten(state, successor)
         features[action]['distanceToFood'] = -self.getMinDisToFood(successor)
         features[action]['disNotGo'] = 0
         features[action]['disPac'] = -self.getMinDisToPac(successor)
+        features[action]['disCap'] = 0
+        features[action]["toScore"] = 0
     return features
-  
+
+  def getDisToCap(self, state):
+    caps = self.getCapsules(state)
+    if len(caps) > 0:
+      return min([self.getMazeDistance(state.getAgentState(self.index).getPosition(), cap) for cap in caps])
+    else:
+      return 0
+
   def getPacPos(self, state):
     oppoPos = []
     for oppo in self.getOpponents(state):
@@ -240,6 +282,17 @@ class OffensiveAgent(CaptureAgent):
         weights[action][key] = 1
     return weights
 
+  def getScaredEnemyPos(self,state):
+    scared = []
+    pos = []
+    for oppo in self.getOpponents(state):
+      if state.getAgentState(oppo).scaredTimer>5:
+        scared.append(oppo)
+    for i in scared:
+      if state.getAgentPosition(i) is not None:
+        pos.append(state.getAgentPosition(i))
+    return pos
+
   def getGPosition(self, state):
     ghostsPos = []
     for i in self.getOpponents(state):
@@ -280,13 +333,6 @@ class OffensiveAgent(CaptureAgent):
     for i in self.enemyPIndex(gameState):
         out.append(gameState.getAgentState(i).getPosition())
     return out
-
-  def enemyPIndex(self, gameState):
-    output = []
-    for i in self.enemyPosition(gameState):
-        if gameState.getAgentState(i).isPacman:
-            output.append(i)
-    return output
 
   def notGo(self, gameState):
     output = []
