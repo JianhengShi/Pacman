@@ -13,6 +13,7 @@
 
 import operator
 import collections
+#import numpy as np
 from game import Actions
 from game import Directions
 from util import Queue
@@ -353,7 +354,7 @@ class Agent(CaptureAgent):
         回家
         '''
         if len(self.homeWay(gameState)) == 0:
-            return Directions.STOP
+            return self.luckyWay(gameState)
         return self.homeWay(gameState)[0]
 
     def ifChase(self, gameState):

@@ -12,7 +12,8 @@
 # Pieter Abbeel (pabbeel@cs.berkeley.edu).
 
 import operator
-import collections
+import collections, time, random, util
+#import numpy as np
 from game import Actions
 from game import Directions
 from util import Queue
@@ -81,9 +82,11 @@ class Agent(CaptureAgent):
                 output = self.eatDots(gameState)
             # If the agent is Pacman
             else:
-                # If under chasing, go to capsule or go home
+                # If under chasing, run away with MCTS
                 if self.ifChase(gameState):
-                    output = self.CapOrHome(gameState)
+                    rootNode = Node(gameState,self,None,None, self.enemyGPosition(gameState), getMyLine(gameState, gameState.isOnRedTeam(self.index)))
+                    print ('run away with MCTS')
+                    output = MCTS(rootNode)
                 # If eats 18 dots or time is up
                 elif (len(self.getDots(gameState)) <= 2) or (gameState.data.timeleft < 80 and gameState.getAgentState(self.index).numCarrying > 0):
                     if not gameState.getAgentState(self.index).isPacman:
@@ -353,7 +356,7 @@ class Agent(CaptureAgent):
         回家
         '''
         if len(self.homeWay(gameState)) == 0:
-            return Directions.STOP
+            return self.luckyWay(gameState)
         return self.homeWay(gameState)[0]
 
     def ifChase(self, gameState):
@@ -669,6 +672,119 @@ class Agent(CaptureAgent):
         剩余的本方食物
         '''
         return self.getFood(gameState).asList()
+    
+    def getMinDistToFood(self, gameState):
+        myPos = gameState.getAgentPosition(self.index)
+        return min([self.getMazeDistance(myPos,f) for f in self.getFood(gameState).asList()])
+
+##########################
+# Upper Confidence Trees #
+##########################
+
+class Node(object):
+
+    def __init__(self, gameState, agent, action, parentNode, ghostPos, borderline):
+        self.parentNode = parentNode
+        self.action = action
+        if parentNode == None:
+            self.deepth = 0
+        else:
+            self.deepth = parentNode.deepth + 1
+
+        self.child = []
+        self.v_times = 1
+        self.q_value = 0.0
+
+        self.gameState = gameState.deepCopy()
+        self.ghostPos = ghostPos
+        self.legalActions = gameState.getLegalActions(agent.index)
+        self.illegalActions = []
+        self.legalActions.remove('Stop')
+
+        self.legalActions = list(set(self.legalActions)-set(self.illegalActions))
+
+        self.unexploredActions = self.legalActions[:]
+        self.borderline = borderline
+        
+        self.agent = agent
+        self.E = 0.9
+    
+def getBestChild(node):
+    bestScore = -99999
+    bestChild = None
+    for n in node.child:
+        score = n.q_value/n.v_times
+        if score > bestScore:
+            bestScore = score
+            bestChild = n
+    return bestChild
+    
+def getExpandedNode(node):
+    if node.deepth >= 10:
+        return node
+
+    if node.unexploredActions != []:
+        action = node.unexploredActions.pop()
+        tempGameState = node.gameState.deepCopy()
+        nextGameState = tempGameState.generateSuccessor(node.agent.index,action)
+        childNode = Node(nextGameState,node.agent,action,node,node.ghostPos,node.borderline)
+        node.child.append(childNode)
+        return childNode
+    
+    if util.flipCoin(node.E): # E-greedy 
+        nextBestNode = getBestChild(node)
+    else:
+        nextBestNode = random.choice(node.child)
+    return getExpandedNode(nextBestNode)
+
+def getReward(node):
+    nowPos = node.gameState.getAgentPosition(node.agent.index)
+    if nowPos == node.gameState.getInitialAgentPosition(node.agent.index):
+        return -500
+    
+    dis_to_ghost = min(node.agent.getMazeDistance(nowPos,ghost_pos) for ghost_pos in node.ghostPos)
+    if dis_to_ghost <= node.deepth:
+        return -500
+
+    value = getFeaturesAttack(node.agent,node)*getWeight()
+    return value
+    
+def backpropagation(node,reward):
+    node.v_times += 1
+    node.q_value += reward
+    if node.parentNode != None:
+        backpropagation(node.parentNode,reward)
+
+def MCTS(node):
+    timeLimit = 0.5
+    start = time.time()
+    while(time.time()-start < timeLimit):
+        
+        nodeForSimulation = getExpandedNode(node) #selection and expand
+
+        reward = getReward(nodeForSimulation)
+
+        backpropagation(nodeForSimulation,reward)
+    
+    return getBestChild(node).action
+
+def getFeaturesAttack(agent,node):
+    """
+    Returns a counter of features for the state
+    """
+    gameState = node.gameState
+    lastGameState = node.parentNode.gameState
+    features = util.Counter()
+
+    features['getFood'] = gameState.getAgentState(agent.index).numCarrying - lastGameState.getAgentState(agent.index).numCarrying
+
+    features['minDistToFood'] = agent.getMinDistToFood(gameState)
+
+    return features
+
+def getWeight():
+    return {'minDistToFood':-10,'getFood':100}
+
 
 ######################################
 # Helper functions of reading layout #
