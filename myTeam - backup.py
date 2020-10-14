@@ -80,7 +80,7 @@ class OffensiveAgent(CaptureAgent):
     '''
 
     self.allActions = [Directions.WEST,Directions.NORTH,Directions.EAST,Directions.SOUTH,Directions.STOP]
-    self.featureKeys = ['distanceToFood', 'foodToEat', 'disNotGo', "disPac", "toScore"]
+    self.featureKeys = ['distanceToFood', 'foodToEat', 'disNotGo', "disPac", "toScore","ghostInRange"]
     self.weights = self.initWeights(self.allActions, self.featureKeys)
     # "disCap"
     # self.weights = {'West': {'distanceToFood': 0.9848943436405496, 'foodToEat': 1.0076808321827964, 'disNotGo': 1.0116492854487635, 'disPac': 0.9974242722518528, 'disCap': 1.0000037221412066, 'toScore': 1.0641869235355477}, 'North': {'distanceToFood': 0.963282008593957, 'foodToEat': 0.9982844973133658, 'disNotGo': 0.9999660472012167, 'disPac': 0.9975303660131575, 'disCap': 1.000005372776374, 'toScore': 0.9615002227958008}, 'East': {'distanceToFood': 1.0058167231413246, 'foodToEat': 0.986893114123885, 'disNotGo': 0.983773067230361, 'disPac': 1.003837198649532, 'disCap': 1.0, 'toScore': 0.9396735624253384}, 'South': {'distanceToFood': 0.9831319899920745, 'foodToEat': 1.0126885699798676, 'disNotGo': 0.989179619191085, 'disPac': 0.9990816353200188, 'disCap': 1.0000280418536098, 'toScore': 0.9739968245819939}, 'Stop': {'distanceToFood': 1.0102750401737628, 'foodToEat': 1.0, 'disNotGo': 1.0015577114488339, 'disPac': 1.0009742728386544, 'disCap': 1.0, 'toScore': 1.0618325330986926}}
@@ -181,7 +181,8 @@ class OffensiveAgent(CaptureAgent):
         features[action]['foodToEat'] = 0
         features[action]['distanceToFood'] = 0
         features[action]['disNotGo'] = 0
-        features[action]["toScore"] = (state.getAgentState(self.index).numCarrying/self.numBeans) * (-abs(self.mySide[0][0]-state.getAgentState(self.index).getPosition()[0])/self.width)
+        features[action]["toScore"] = 0
+        features[action]['ghostInRange'] = 0
         
       elif state.getAgentState(self.index).isPacman or state.getAgentState(self.index).getPosition() in self.mySide:
         features[action]['disPac'] = 0
@@ -191,9 +192,11 @@ class OffensiveAgent(CaptureAgent):
         if not self.enemyGPosition(state):
           features[action]['foodToEat'] = self.getFoodNotEaten(state, successor)
           features[action]['distanceToFood'] = -self.getMinDisToFood(successor)
+          features[action]['ghostInRange'] = 0
         else:
           features[action]['foodToEat'] = 0
           features[action]['distanceToFood'] = 0
+          features[action]['ghostInRange'] = min([self.getMazeDistance(successor.getAgentState(self.index).getPosition(), ghost) for ghost in self.enemyGPosition(state)])/5
           # if self.getDisToCap(state) < 5:
             # features[action]['disCap'] = -self.getDisToCap(state)/(self.height * self.width)
             # print(self.getCapsules(state))
@@ -204,6 +207,7 @@ class OffensiveAgent(CaptureAgent):
         features[action]['disPac'] = -self.getMinDisToPac(successor)
         # features[action]['disCap'] = 0
         features[action]["toScore"] = 0
+        features[action]['ghostInRange'] = 0
     return features
 
   def getDisToCap(self, state):
