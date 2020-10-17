@@ -224,7 +224,7 @@ class Agent(CaptureAgent):
                     if len(path) < d:
                         d = len(path)
                         c = path
-                if len(c)==0:
+                if c is None or len(c)==0:
                     return Directions.STOP
                 else:
                     return c[0]
