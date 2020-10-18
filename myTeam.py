@@ -450,12 +450,16 @@ class Agent(CaptureAgent):
         if len(dic3) == 0:
             if self.index<self.anotherIndex(gameState):
                 top=getMyLine(gameState, self.red)[len(getMyLine(gameState, self.red))-1]
-                return self.aStarSearch(gameState, gameState.getAgentState(self.index).getPosition(), [top], self.notGo(gameState))[0]
+                path= self.aStarSearch(gameState, gameState.getAgentState(self.index).getPosition(), [top], self.notGo2(gameState))
+                if path is not None and len(path)>0:
+                    return path[0]
             else:
                 bottom=getMyLine(gameState, self.red)[0]
-                return self.aStarSearch(gameState, gameState.getAgentState(self.index).getPosition(), [bottom], self.notGo(gameState))[0]
-
+                path= self.aStarSearch(gameState, gameState.getAgentState(self.index).getPosition(), [bottom], self.notGo2(gameState))
+                if path is not None and len(path)>0:
+                    return path[0]
             return self.goHome(gameState)
+
         out = sorted(dic3.items(), key=operator.itemgetter(1))[0][0]
         out_val = sorted(dic3.items(), key=operator.itemgetter(1))[0][1]
 
