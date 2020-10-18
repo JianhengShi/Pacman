@@ -171,7 +171,7 @@ class Agent(CaptureAgent):
         '''
         if gameState.getAgentState(self.index).scaredTimer > 0:
             return False
-        if len(self.getDots(gameState)) <= 3 and self.getScore(gameState) >0 and gameState.getAgentState(self.index).numCarrying == 0:
+        if len(self.getDots(gameState)) <= 2 and self.getScore(gameState) >0 and gameState.getAgentState(self.index).numCarrying == 0:
             return True
         # if oppoPac is False and gameState.getAgentState(self.index).isPacman is False and self.getScore(gameState) >0:
         #     return True
@@ -222,6 +222,8 @@ class Agent(CaptureAgent):
                 path = self.aStarSearch(gameState, gameState.getAgentState(self.index).getPosition(), [self.def_target], self.notGo2(gameState))
                 if path is not None and len(path)>0:
                     return path[0]
+                else:
+                    return Directions.STOP
                 c = None
                 d=9999999
                 for dot in self.getMyDots(gameState):
