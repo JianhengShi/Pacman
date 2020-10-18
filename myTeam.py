@@ -66,6 +66,7 @@ class Agent(CaptureAgent):
         self.pos = [] #List of position history
         self.stuckThreshold = 15
         self.safeBreakTie = 2
+        self.fortune=0
   
     def chooseAction(self, gameState):  
         '''
@@ -80,7 +81,11 @@ class Agent(CaptureAgent):
             output = self.catch(gameState)
         else:
             if len(self.pos) == self.stuckThreshold and self.ifStuck():
-                output = self.breaktie(gameState)
+                if self.fortune>=10 and gameState.getAgentState(self.anotherIndex(gameState)).isPacman is False:
+                    output=Directions.STOP
+                    self.fortune=0
+                else:
+                    output = self.breaktie(gameState)
             # If the agent is ghost, go back to offense
             elif not gameState.getAgentState(self.index).isPacman:
                 output = self.eatDotsTest(gameState)
@@ -168,6 +173,8 @@ class Agent(CaptureAgent):
             return False
         if len(self.getDots(gameState)) <= 3 and self.getScore(gameState) >0 and gameState.getAgentState(self.index).numCarrying == 0:
             return True
+        # if oppoPac is False and gameState.getAgentState(self.index).isPacman is False and self.getScore(gameState) >0:
+        #     return True
         
         a = 0
         b = 0
@@ -610,6 +617,7 @@ class Agent(CaptureAgent):
         return False
 
     def luckyWay(self, gameState):
+        self.fortune=self.fortune+1
         safeAction = []
         dp = self.notGo2(gameState)
         legalActions = gameState.getLegalActions(self.index)
