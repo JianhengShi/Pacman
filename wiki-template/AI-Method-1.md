@@ -35,7 +35,7 @@ Heuristic Search Algorithms has been widely used in our project. Since its funct
 ```
 when being chased, the target location is the capsule, or a point on the centerline of the map:
 ```python
-    def CapOrHome(self, gameState):
+    def capOrHome(self, gameState):
         ...
         path = self.aStarSearch(gameState, gameState.getAgentState(self.index).getPosition(), [capsule], self.notGo(gameState))
         ...
