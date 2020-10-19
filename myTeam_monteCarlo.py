@@ -766,11 +766,11 @@ def getExpandedNode(node):
 def getReward(node):
     nowPos = node.gameState.getAgentPosition(node.agent.index)
     if nowPos == node.gameState.getInitialAgentPosition(node.agent.index):
-        return -1000
+        return -len(node.agent.getCapsules(node.gameState))*200-1000
     
     dis_to_ghost = min(node.agent.getMazeDistance(nowPos,ghost_pos) for ghost_pos in node.ghostPos)
-    if dis_to_ghost <= node.deepth:
-        return -1000
+    if dis_to_ghost <= node.deepth-1:
+        return -len(node.agent.getCapsules(node.gameState))*200-100
 
     value = getFeaturesAttack(node.agent,node)*getWeight()
     return value
@@ -807,7 +807,7 @@ def getFeaturesAttack(agent,node):
     return features
 
 def getWeight():
-    return {'minDistToFood':-1,'getFood':10, 'capsuleRemain': -100}
+    return {'minDistToFood':-1,'getFood':10, 'capsuleRemain': -200}
 
 
 ######################################
