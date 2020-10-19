@@ -216,7 +216,7 @@ class Agent(CaptureAgent):
             if len(eatenFood) != 0:
                 self.def_target=eatenFood[0]
                 path = self.aStarSearch(gameState, gameState.getAgentState(self.index).getPosition(), [eatenFood[0]], self.notGo2(gameState))
-                if len(path)>0:
+                if path is not None and len(path)>0:
                     return path[0]
             else:
                 path = self.aStarSearch(gameState, gameState.getAgentState(self.index).getPosition(), [self.def_target], self.notGo2(gameState))
