@@ -78,7 +78,7 @@ class QLearningCaptureAgent(CaptureAgent):
 
     self.allActions = [Directions.WEST,Directions.NORTH,Directions.EAST,Directions.SOUTH,Directions.STOP]
     self.offensiveFeatureKeys = ['distanceToFood', 'foodToEat', 'disNotGo', 'ghostInRange', "disPac"]
-    self.defensiveFeatureKeys = ["disPac", "onDefend", "disFoodToDefend",'distanceToFood', 'foodToEat', 'disNotGo', 'ghostInRange', "disPac"]
+    self.defensiveFeatureKeys = ["disPac", "onDefend", "disFoodToDefend",'distanceToFood']
     # print(self.features)
     self.offensiveWeights = self.initWeights(self.allActions, self.offensiveFeatureKeys)
     self.defensiveWeights = self.initWeights(self.allActions, self.defensiveFeatureKeys)
@@ -100,7 +100,7 @@ class QLearningCaptureAgent(CaptureAgent):
   def chooseAction(self, gameState):
     state = gameState    
     if self.isOffensive():
-      if (len(self.getDots(state)) <= 2) or (state.data.timeleft < 80 and state.getAgentState(self.index).numCarrying > 0):
+      if (len(self.getDots(state)) <= 2) or (state.data.timeleft < 80 and state.getAgentState(self.index).numCarrying > 0) or (state.getAgentState(self.index).numCarrying > 8):
         optiAct = self.goHome(state)
       else:
         legalActions = state.getLegalActions(self.index)  

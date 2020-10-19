@@ -1,0 +1,71 @@
+[33mcommit f081baad506dfe718bde4fab8fb830e951b2c297[m[33m ([m[1;36mHEAD[m[33m)[m
+Author: Si Cheng <sccheng2@student.unimelb.edu.au>
+Date:   Mon Oct 19 17:03:59 2020 +1100
+
+    added aviod pacman when scared
+
+[33mcommit 8aa3c67f7962b8f406e3c2a982c7f647c4c45992[m
+Author: Si Cheng <sccheng2@student.unimelb.edu.au>
+Date:   Mon Oct 19 16:12:50 2020 +1100
+
+    two agents
+
+[33mcommit 90edb61042868e3de278a4dd2930630fc7cb18b1[m
+Author: Si Cheng <sccheng2@student.unimelb.edu.au>
+Date:   Mon Oct 19 12:28:10 2020 +1100
+
+    add go home by astar
+
+[33mcommit a2876e5fd7af5012fc667065e1d9d08038ba4ad9[m
+Author: Si Cheng <sccheng2@student.unimelb.edu.au>
+Date:   Wed Oct 14 23:34:27 2020 +1100
+
+    adjusted features myTeam2 has more features but perform worse
+
+[33mcommit 6312a706ad2b5eda17d653765a7c816275d3154e[m
+Author: Si Cheng <sccheng2@student.unimelb.edu.au>
+Date:   Wed Oct 14 17:19:12 2020 +1100
+
+    add ghost behaviour
+
+[33mcommit 2dc3429d72ac4024ec12c6b077b7062c1130b8d2[m
+Author: Si Cheng <sccheng2@student.unimelb.edu.au>
+Date:   Wed Oct 14 16:01:35 2020 +1100
+
+    add epsilon and adjust avoid ghost
+
+[33mcommit 2a18ad874ab249294409a054d2090595134e344d[m
+Author: Si Cheng <sccheng2@student.unimelb.edu.au>
+Date:   Thu Oct 8 21:52:32 2020 +1100
+
+    redefined ghostinrange
+
+[33mcommit 1d2ae14c97197e43264548c97b5da30fd407b49e[m
+Author: Si Cheng <sccheng2@student.unimelb.edu.au>
+Date:   Thu Oct 8 21:34:15 2020 +1100
+
+    added weight update
+
+[33mcommit bcbc394adbca2c08718d24be78875a315fd30597[m
+Author: Si Cheng <sccheng2@student.unimelb.edu.au>
+Date:   Mon Sep 28 15:41:34 2020 +1000
+
+    init feature, wight, computeQ, To Do: reward function, update weight
+
+[33mcommit a7362152802899af63384997e668135d225e1e42[m[33m ([m[1;32mmaster[m[33m)[m
+Author: Zhiyu WANG <zhiywang1@student.unimelb.edu.au>
+Date:   Fri Sep 25 18:48:21 2020 +1000
+
+    update team information
+
+[33mcommit 27cdfabec06dc02d37acd2b1ab71be67edd85832[m
+Author: Zhiyu WANG <zhiywang1@student.unimelb.edu.au>
+Date:   Fri Sep 25 18:31:12 2020 +1000
+
+    version1
+
+[33mcommit 1adad03142e54845050260a85441f378a720079f[m
+Author: happysf128 <32860013+happysf128@users.noreply.github.com>
+Date:   Tue Sep 15 13:37:18 2020 +1000
+
+    Initial commit
