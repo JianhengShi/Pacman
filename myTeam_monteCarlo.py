@@ -63,6 +63,7 @@ class Agent(CaptureAgent):
         self.spl = getSpl(gameState, self.red)
         self.out = getOut(gameState, self.red)
         self.pos = [] #List of position history
+        self.underchasing = [] #List of uder chasing history
         self.stuckThreshold = 15
         self.safeBreakTie = 2
   
@@ -83,7 +84,7 @@ class Agent(CaptureAgent):
             # If the agent is Pacman
             else:               
                 # If eats 18 dots or time is up
-                if (len(self.getDots(gameState)) <= 2) or (gameState.data.timeleft < 80 and gameState.getAgentState(self.index).numCarrying > 0):
+                if (len(self.getDots(gameState)) <= 2) or (gameState.data.timeleft < 80 and gameState.getAgentState(self.index).numCarrying > 0) or self.ifLongChasing():
                     if not gameState.getAgentState(self.index).isPacman:
                         return catch(gameState)
                     else:
@@ -113,6 +114,11 @@ class Agent(CaptureAgent):
             self.pos.pop(0)
             self.pos.append(gameState.getAgentPosition(self.index))
 
+        if self.ifChase(gameState):
+            self.underchasing.append(1)
+        else:
+            self.underchasing.append(0)
+
     def ifStuck(self):
         '''
         Check if the agent is stuck. If stuck, return True.
@@ -132,6 +138,20 @@ class Agent(CaptureAgent):
         else:
             return False
 
+    def ifLongChasing(self):
+        '''
+        Check if the agent is stuck by chasing.
+        '''
+        if self.underchasing[-1] ==1:
+            res = next(i for i, j in enumerate(self.underchasing[::-1]) if j != 1)
+            if res >= 20:
+                print("Stuck by chasing!")
+                return True
+            else:
+                return False
+        else:
+            return False
+       
     def breaktie(self,gameState):
         '''
         Return a random action (excluding those will leads to dangerous positions) 
@@ -678,7 +698,10 @@ class Agent(CaptureAgent):
     
     def getMinDistToFood(self, gameState):
         myPos = gameState.getAgentPosition(self.index)
-        return min([self.getMazeDistance(myPos,f) for f in self.getFood(gameState).asList()])
+        if len(self.getFood(gameState).asList())==0:
+            return 0
+        else:
+            return min([self.getMazeDistance(myPos,f) for f in self.getFood(gameState).asList()])
 
 ##########################
 # Upper Confidence Trees #
@@ -743,11 +766,11 @@ def getExpandedNode(node):
 def getReward(node):
     nowPos = node.gameState.getAgentPosition(node.agent.index)
     if nowPos == node.gameState.getInitialAgentPosition(node.agent.index):
-        return -500
+        return -1000
     
     dis_to_ghost = min(node.agent.getMazeDistance(nowPos,ghost_pos) for ghost_pos in node.ghostPos)
     if dis_to_ghost <= node.deepth:
-        return -500
+        return -1000
 
     value = getFeaturesAttack(node.agent,node)*getWeight()
     return value
@@ -779,10 +802,12 @@ def getFeaturesAttack(agent,node):
 
     features['minDistToFood'] = agent.getMinDistToFood(gameState)
 
+    features['capsuleRemain'] = len(agent.getCapsules(gameState))
+
     return features
 
 def getWeight():
-    return {'minDistToFood':-10,'getFood':100}
+    return {'minDistToFood':-1,'getFood':10, 'capsuleRemain': -100}
 
 
 ######################################
