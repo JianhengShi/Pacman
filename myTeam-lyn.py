@@ -82,7 +82,7 @@ class Agent(CaptureAgent):
                 output = self.eatDots(gameState)
             # If the agent is Pacman
             else:
-                # If under chasing, go to capsule or go home
+                # If under c hasing, go to capsule or go home
                 if self.ifChase(gameState):
                     output = self.CapOrHome(gameState)
                 # If eats 18 dots or time is up

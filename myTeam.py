@@ -19,6 +19,9 @@ import game
 import numpy as np
 from util import nearestPoint
 import json
+from util import PriorityQueue
+from game import Actions
+import collections
 #################
 # Team creation #
 #################
@@ -94,29 +97,34 @@ class OffensiveAgent(CaptureAgent):
     self.spl = getSpl(gameState, self.red)
     self.width, self.height = gameState.getWalls().width, gameState.getWalls().height   
     self.mySide = getMyLine(gameState, self.red) 
+    self.totalFood = len(self.getDots(gameState))
     print(self.mySide)
 
   def chooseAction(self, gameState):
     state = gameState    
-    legalActions = state.getLegalActions(self.index)  
-    if util.flipCoin(self.epsilon):
-      optiAct = random.choice(legalActions)
+    if (len(self.getDots(state)) <= 2) or (state.data.timeleft < 80 and state.getAgentState(self.index).numCarrying > 0) or state.getAgentState(self.index).numCarrying > 2:
+      print("go home")
+      optiAct = self.goHome(state)
     else:
-      successors = []
-      for legalAction in legalActions:
-        successors.append((legalAction, self.getSuccessor(state, legalAction)))   
-    
-      # print("\ncurrent pos", state.getAgentState(self.index).getPosition())
-      features = self.getFeatureValues(state, successors)
-      # print("current state features", features)
-      optiAct, self.Q = self.computeQ(features, legalActions)
-      # print("action to take", optiAct)
+      legalActions = state.getLegalActions(self.index)  
+      if util.flipCoin(self.epsilon):
+        optiAct = random.choice(legalActions)
+      else:
+        successors = []
+        for legalAction in legalActions:
+          successors.append((legalAction, self.getSuccessor(state, legalAction)))   
+      
+        # print("\ncurrent pos", state.getAgentState(self.index).getPosition())
+        features = self.getFeatureValues(state, successors)
+        # print("current state features", features)
+        optiAct, self.Q = self.computeQ(features, legalActions)
+        # print("action to take", optiAct)
 
-      successor = self.getSuccessor(state, optiAct)
-      # print("successor of optimal action", optiAct)
-      reward = self.calReward(state, optiAct)
-      # print("reward", reward)
-      self.updateWeight(state, optiAct, successor, reward, features) 
+        successor = self.getSuccessor(state, optiAct)
+        # print("successor of optimal action", optiAct)
+        reward = self.calReward(state, optiAct)
+        # print("reward", reward)
+        self.updateWeight(state, optiAct, successor, reward, features) 
     return optiAct
 
   def updateWeight(self, state, action, successor, reward, features):
@@ -157,12 +165,13 @@ class OffensiveAgent(CaptureAgent):
         features[action]['ghostInRange'] = self.getMinDisToGhost(successor)
         if not self.enemyGPosition(state):
           features[action]['foodToEat'] = self.getFoodNotEaten(state, successor)
+          print(self.getFoodNotEaten(state, successor))
           features[action]['distanceToFood'] = -self.getMinDisToFood(successor)
         else:
           features[action]['foodToEat'] = 0
           features[action]['distanceToFood'] = 0
       else:
-        features[action]['foodToEat'] = self.getFoodNotEaten(state, successor)
+        features[action]['foodToEat'] = 0
         features[action]['distanceToFood'] = -self.getMinDisToFood(successor)
         features[action]['disNotGo'] = 0
         features[action]['disPac'] = -self.getMinDisToPac(successor)
@@ -295,6 +304,13 @@ class OffensiveAgent(CaptureAgent):
             output.append(i)
     return output
 
+  def getDots(self, gameState):
+        '''
+        Return a list of positions of remained food our agents supposed to eat.
+        剩余的本方食物
+        '''
+        return self.getFood(gameState).asList()
+
   def notGo(self, gameState):
     output = []
     output=self.enemyGPosition(gameState)
@@ -314,6 +330,64 @@ class OffensiveAgent(CaptureAgent):
             output=output+list(getAroundPositions(gameState, k))
     return output
 
+  def aStarSearch(self, gameState, start, goal, lis):
+      '''
+      A star search.
+      Use Maze distance as heuristic.
+      Where lis is a list of dangerous places we should not go.
+      '''
+      pq = PriorityQueue()
+      c_set = set()
+      pq.push((start, [], float('inf')), 0)
+      dic = collections.defaultdict(lambda: float('inf'))
+      if goal[0] in lis:
+          
+          return None
+      while not pq.isEmpty():
+          node = pq.pop()
+          if node[0] not in c_set or node[2] < dic[node[0]]:
+              c_set.add(node[0])
+              dic[node[0]] = node[2]
+              if node[0] in goal:
+                  return node[1]
+              actions = [Directions.WEST,Directions.NORTH,Directions.EAST,Directions.SOUTH,]
+              successors = []
+              for i in actions:
+                  x, y = node[0]
+                  dx, dy = Actions.directionToVector(i)
+                  if not gameState.getWalls()[int(x + dx)][int(y + dy)] and (int(x + dx), int(y + dy)) not in lis:
+                      successors.append(((int(x + dx), int(y + dy)), i))
+              for i, j in successors:
+                  pq.update((i, node[1] +[j],len(node[1]) + 1), len(node[1]) + 1 + max(self.getMazeDistance(i, goal)for goal in goal))
+
+  def goHome(self, gameState):
+        '''
+        Return an action that leads the agent home.
+        回家
+        '''
+        if len(self.homeWay(gameState)) == 0:
+            return Directions.STOP
+        return self.homeWay(gameState)[0]
+
+  def homeWay(self, gameState):
+          '''
+          Return a list of actions of shortest way to go back to our side to unload food.
+          最近的回家的路
+          '''
+          dp = self.notGo(gameState)
+          p = gameState.getAgentState(self.index).getPosition()
+          line = getMyLine(gameState, self.red)
+          way = None
+          a = 9999999
+          for i in line:
+              path = self.aStarSearch(gameState, p, [i], dp)
+              if path is not None and len(path) < a:
+                  a = len(path)
+                  way = path
+          if way is None:
+              return []
+          return way
+
 def getAroundPositions(gameState, pos):
   list1 = [(int(pos[0])-1,int(pos[1])), (int(pos[0])+1,int(pos[1])), (int(pos[0]),int(pos[1]+1)), (int(pos[0]),int(pos[1]-1))]
   set1 = set(list1)
@@ -322,6 +396,8 @@ def getAroundPositions(gameState, pos):
       if gameState.hasWall(a,b):
           set1.remove((a,b))
   return set1
+
+  
 
 def getOppoLine(gameState, red):
   a = gameState.data.layout.width // 2
@@ -412,5 +488,7 @@ def getSpl(gameState, red):
       return_list.append(target1)
       return_list.append(target2)
   return return_list
+
+
 
     
