@@ -81,19 +81,19 @@ class Agent(CaptureAgent):
             if not gameState.getAgentState(self.index).isPacman:
                 output = self.eatDots(gameState)
             # If the agent is Pacman
-            else:
+            else:               
+                # If eats 18 dots or time is up
+                if (len(self.getDots(gameState)) <= 2) or (gameState.data.timeleft < 80 and gameState.getAgentState(self.index).numCarrying > 0):
+                    if not gameState.getAgentState(self.index).isPacman:
+                        return catch(gameState)
+                    else:
+                        output = self.goHome(gameState)
                 # If under chasing, run away with MCTS
-                if self.ifChase(gameState):
+                elif self.ifChase(gameState):
                     if len(self.getDots(gameState)) > 0:
                         rootNode = Node(gameState,self,None,None, self.enemyGPosition(gameState), getMyLine(gameState, gameState.isOnRedTeam(self.index)))
                         print ('run away with MCTS')
                         output = MCTS(rootNode)
-                    else:
-                        output = self.goHome(gameState)
-                # If eats 18 dots or time is up
-                elif (len(self.getDots(gameState)) <= 2) or (gameState.data.timeleft < 80 and gameState.getAgentState(self.index).numCarrying > 0):
-                    if not gameState.getAgentState(self.index).isPacman:
-                        return catch(gameState)
                     else:
                         output = self.goHome(gameState)
                 # Otherwise, eat dots
