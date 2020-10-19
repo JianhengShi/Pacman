@@ -94,6 +94,7 @@ class QLearningCaptureAgent(CaptureAgent):
     self.width, self.height = gameState.getWalls().width, gameState.getWalls().height   
     self.mySide = getMyLine(gameState, self.red) 
     self.totalFood = len(self.getDots(gameState))
+    self.my_dots = self.getFoodYouAreDefending(gameState).asList()
     print(self.index, self.isOffensive())
 
   def chooseAction(self, gameState):
@@ -123,7 +124,8 @@ class QLearningCaptureAgent(CaptureAgent):
           self.offensiveWeights = self.updateWeight(state, optiAct, successor, reward, features, self.offensiveWeights) 
       return optiAct
     else: 
-      print("\n", self.index, state.getAgentState(self.index).getPosition())
+
+      # print("\n", self.index, state.getAgentState(self.index).getPosition())
       legalActions = state.getLegalActions(self.index)  
       if util.flipCoin(self.epsilon):
         optiAct = random.choice(legalActions)
@@ -132,14 +134,15 @@ class QLearningCaptureAgent(CaptureAgent):
         for legalAction in legalActions:
           successors.append((legalAction, self.getSuccessor(state, legalAction)))    
         features = self.getFeatureValues(state, successors)
-        print("current state features", features)
+        # print("current state features", features)
         optiAct, self.Q = self.computeQ(features, legalActions, self.defensiveWeights)
-        print("action to take", optiAct)
+        # print("action to take", optiAct)
 
         successor = self.getSuccessor(state, optiAct)
         reward = self.calReward(state, optiAct)
         self.defensiveWeights = self.updateWeight(state, optiAct, successor, reward, features, self.defensiveWeights) 
-        print(optiAct)
+        # print(optiAct)
+        self.my_dots = self.getFoodYouAreDefending(state).asList()
       return optiAct
 
   def computeQ(self,features, legalActions, weights):
@@ -148,12 +151,12 @@ class QLearningCaptureAgent(CaptureAgent):
       value = 0
       for feature in features[action].keys():
         value += features[action][feature] * weights[action][feature]
-      if not self.isOffensive():
-        print("index, action, qvalue", self.index, action, value)
+      # if not self.isOffensive():
+      #   print("index, action, qvalue", self.index, action, value)
         
       Qs[action] = value
-    if not self.isOffensive():
-      print(self.index, Qs.argMax(),Qs[Qs.argMax()])
+    # if not self.isOffensive():
+    #   print(self.index, Qs.argMax(),Qs[Qs.argMax()])
     return (Qs.argMax(),Qs[Qs.argMax()])
 
   def updateWeight(self, state, action, successor, reward, features, weights):
@@ -405,13 +408,21 @@ class DefensiveAgent(QLearningCaptureAgent):
   def getFeatureValues(self, state, successors):
     features = self.initFeatures(self.allActions, self.defensiveFeatureKeys)
     for action, successor in successors:
-      features[action]["disInvader"] = 0
-      features[action]["disPac"] = -self.getMinDisToPac(successor)
-      features[action]["disFoodToDefend"] = -self.getMaxDisToMyFood(successor)
       if successor.getAgentState(self.index).isPacman:
         features[action]["onDefend"] = 1
       else:
         features[action]["onDefend"] = 0
+      if self.getMinDisToPac(state) == 0:
+        features[action]["disInvader"] = -self.getDisToInvader(successor)
+        features[action]["disPac"] = 0
+        features[action]["disFoodToDefend"] = -self.getMaxDisToMyFood(successor)
+      else:
+        features[action]["disFoodToDefend"] = 0
+        features[action]["disInvader"] = 0
+        if state.getAgentState(self.index).scaredTimer > 0:
+          features[action]["disPac"] = self.getMinDisToPac(successor)
+        else:
+          features[action]["disPac"] = -self.getMinDisToPac(successor)   
     return features
 
   def getMaxDisToMyFood(self, state):
@@ -420,6 +431,14 @@ class DefensiveAgent(QLearningCaptureAgent):
       return 0
     else:
       return max(myFoodDis)/(self.height * self.width)**2  
+
+  def getDisToInvader(self, state):
+    eatenFood = list(set(self.my_dots)-set(self.getFoodYouAreDefending(state).asList()))
+    eatenFoodDis = [self.getMazeDistance(state.getAgentState(self.index).getPosition(), food) for food in eatenFood]
+    if len(eatenFoodDis) == 0:
+      return 0
+    else:
+      return min(eatenFoodDis)/(self.height * self.width)
 
 def getAroundPositions(gameState, pos):
   list1 = [(int(pos[0])-1,int(pos[1])), (int(pos[0])+1,int(pos[1])), (int(pos[0]),int(pos[1]+1)), (int(pos[0]),int(pos[1]-1))]
