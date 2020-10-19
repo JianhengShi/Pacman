@@ -22,6 +22,7 @@ import json
 from util import PriorityQueue
 from game import Actions
 import collections
+import operator
 #################
 # Team creation #
 #################
@@ -78,7 +79,7 @@ class QLearningCaptureAgent(CaptureAgent):
 
     self.allActions = [Directions.WEST,Directions.NORTH,Directions.EAST,Directions.SOUTH,Directions.STOP]
     self.offensiveFeatureKeys = ['distanceToFood', 'foodToEat', 'disNotGo', 'ghostInRange']
-    self.defensiveFeatureKeys = ["disPac", "onDefend", "disFoodToDefend",'distanceToFood', 'foodToEat', 'disNotGo', 'ghostInRange']
+    self.defensiveFeatureKeys = ["disPac", "onDefend", "disFoodToDefend"]
     # print(self.features)
     self.offensiveWeights = self.initWeights(self.allActions, self.offensiveFeatureKeys)
     self.defensiveWeights = self.initWeights(self.allActions, self.defensiveFeatureKeys)
@@ -433,12 +434,6 @@ class DefensiveAgent(QLearningCaptureAgent):
   def getFeatureValues(self, state, successors):
     features = self.initFeatures(self.allActions, self.defensiveFeatureKeys)
     for action, successor in successors:
-      features[action]['foodToEat'] = 0
-      features[action]['distanceToFood'] = 0
-      features[action]['disNotGo'] = 0
-      features[action]['ghostInRange'] = 0
-      features[action]["disPac"] = 0
-
       if successor.getAgentState(self.index).isPacman:
         features[action]["onDefend"] = 1
       else:
@@ -451,15 +446,6 @@ class DefensiveAgent(QLearningCaptureAgent):
         features[action]["disFoodToDefend"] = -self.getMaxDisToMyFood(successor)
         if state.getAgentState(self.index).scaredTimer > 0:
           features[action]["disPac"] = self.getMinDisToPac(successor)
-          if successor.getAgentState(self.index).isPacman:
-            features[action]["onDefend"] = 2
-          else:
-            features[action]["onDefend"] = 0
-          features[action]["disFoodToDefend"] = 0
-          features[action]['foodToEat'] = self.getFoodNotEaten(state, successor)
-          features[action]['distanceToFood'] = -self.getMinDisToFood(successor)
-          features[action]['disNotGo'] = 0
-          features[action]['ghostInRange'] = 0
         else:
           features[action]["disPac"] = -self.getMinDisToPac(successor)   
     return features
