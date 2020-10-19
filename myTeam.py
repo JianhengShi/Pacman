@@ -77,7 +77,7 @@ class QLearningCaptureAgent(CaptureAgent):
     '''
 
     self.allActions = [Directions.WEST,Directions.NORTH,Directions.EAST,Directions.SOUTH,Directions.STOP]
-    self.offensiveFeatureKeys = ['distanceToFood', 'foodToEat', 'disNotGo', 'ghostInRange', "disPac"]
+    self.offensiveFeatureKeys = ['distanceToFood', 'foodToEat', 'disNotGo', 'ghostInRange']
     self.defensiveFeatureKeys = ["disPac", "onDefend", "disFoodToDefend",'distanceToFood']
     # print(self.features)
     self.offensiveWeights = self.initWeights(self.allActions, self.offensiveFeatureKeys)
@@ -95,12 +95,11 @@ class QLearningCaptureAgent(CaptureAgent):
     self.mySide = getMyLine(gameState, self.red) 
     self.totalFood = len(self.getDots(gameState))
     self.my_dots = self.getFoodYouAreDefending(gameState).asList()
-    print(self.index, self.isOffensive())
 
   def chooseAction(self, gameState):
     state = gameState    
     if self.isOffensive():
-      if (len(self.getDots(state)) <= 2) or (state.data.timeleft < 80 and state.getAgentState(self.index).numCarrying > 0) or (state.getAgentState(self.index).numCarrying > 8):
+      if (len(self.getDots(state)) <= 2) or (state.data.timeleft < 80 and state.getAgentState(self.index).numCarrying > 0) or (state.getAgentState(self.index).numCarrying > 6):
         optiAct = self.goHome(state)
       else:
         legalActions = state.getLegalActions(self.index)  
@@ -408,17 +407,14 @@ class OffensiveAgent(QLearningCaptureAgent):
         if not self.enemyGPosition(state):
           features[action]['foodToEat'] = self.getFoodNotEaten(state, successor)
           features[action]['distanceToFood'] = -self.getMinDisToFood(successor)
-          features[action]["disPac"] = 0
         else:
           features[action]['foodToEat'] = 0
           features[action]['distanceToFood'] = 0
-          features[action]["disPac"] = 0
       else:
         features[action]['foodToEat'] = self.getFoodNotEaten(state, successor)
         features[action]['distanceToFood'] = -self.getMinDisToFood(successor)
         features[action]['disNotGo'] = 0
         features[action]['ghostInRange'] = 0
-        features[action]["disPac"] = -self.getMinDisToPac(successor)
     return features
 
 class DefensiveAgent(QLearningCaptureAgent):  
@@ -443,12 +439,13 @@ class DefensiveAgent(QLearningCaptureAgent):
       if self.getMinDisToPac(state) == 0:
         features[action]["disPac"] = 0
         features[action]["disFoodToDefend"] = -self.getMaxDisToMyFood(successor)
-      else:
-        features[action]["disFoodToDefend"] = 0
+      else:       
         if state.getAgentState(self.index).scaredTimer > 0:
-          features[action]["disPac"] = self.getMinDisToPac(successor)
+          features[action]["disFoodToDefend"] = 0
+          features[action]["disPac"] = self.getMinDisToPac(successor)*2
         else:
           features[action]["disPac"] = -self.getMinDisToPac(successor)   
+          features[action]["disFoodToDefend"] = -self.getMaxDisToMyFood(successor)
     return features
 
   def getMaxDisToMyFood(self, state):
