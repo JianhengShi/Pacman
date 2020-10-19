@@ -38,7 +38,7 @@ As a local heuristic search method, Hill Climbing is easy to implement and has a
 
 
 #### *Disadvantages*
-Performance of Hill Climbing is limited. Thus, we just use it as a baseline iprovement method.
+Performance of Hill Climbing is limited. Thus, we just use it as a baseline improvement method.
 
 [Back to top](#table-of-contents)
 
