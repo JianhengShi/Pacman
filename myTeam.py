@@ -78,7 +78,7 @@ class QLearningCaptureAgent(CaptureAgent):
 
     self.allActions = [Directions.WEST,Directions.NORTH,Directions.EAST,Directions.SOUTH,Directions.STOP]
     self.offensiveFeatureKeys = ['distanceToFood', 'foodToEat', 'disNotGo', 'ghostInRange']
-    self.defensiveFeatureKeys = ["disPac", "onDefend", "disFoodToDefend",'distanceToFood']
+    self.defensiveFeatureKeys = ["disPac", "onDefend", "disFoodToDefend"]
     # print(self.features)
     self.offensiveWeights = self.initWeights(self.allActions, self.offensiveFeatureKeys)
     self.defensiveWeights = self.initWeights(self.allActions, self.defensiveFeatureKeys)
