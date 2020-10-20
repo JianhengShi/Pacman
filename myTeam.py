@@ -78,7 +78,7 @@ class QLearningCaptureAgent(CaptureAgent):
 
     self.allActions = [Directions.WEST,Directions.NORTH,Directions.EAST,Directions.SOUTH,Directions.STOP]
     self.offensiveFeatureKeys = ['distanceToFood', 'foodToEat', 'disNotGo', 'ghostInRange']
-    self.defensiveFeatureKeys = ["disPac", "onDefend", "disFoodToDefend",'distanceToFood']
+    self.defensiveFeatureKeys = ["disPac", "onDefend", "disFoodToDefend",'distanceToFood', "disPac_scared","disFoodToDefend_scared" ]
     # print(self.features)
     self.offensiveWeights = self.initWeights(self.allActions, self.offensiveFeatureKeys)
     self.defensiveWeights = self.initWeights(self.allActions, self.defensiveFeatureKeys)
@@ -106,7 +106,7 @@ class QLearningCaptureAgent(CaptureAgent):
   def chooseAction(self, gameState):
     state = gameState    
     if self.isOffensive():
-      if (len(self.getDots(state)) <= 2) or (state.data.timeleft < 50 and state.getAgentState(self.index).numCarrying > 0) or (state.getAgentState(self.index).numCarrying > self.eachRunFood):
+      if (len(self.getDots(state)) <= 2) or (state.data.timeleft < 70 and state.getAgentState(self.index).numCarrying > 0) or (state.getAgentState(self.index).numCarrying > self.eachRunFood):
         optiAct = self.goHome(state)
       else:
         legalActions = state.getLegalActions(self.index)  
@@ -436,22 +436,41 @@ class DefensiveAgent(QLearningCaptureAgent):
     
   def getFeatureValues(self, state, successors):
     features = self.initFeatures(self.allActions, self.defensiveFeatureKeys)
+    print(self.isOnMySide(state))
     for action, successor in successors:
-      if successor.getAgentState(self.index).isPacman:
-        features[action]["onDefend"] = 1
-      else:
+      features[action]["disPac_scared"] = 0
+      features[action]["disFoodToDefend_scared"] = 0
+
+      if self.isOnMySide(successor):
         features[action]["onDefend"] = 0
+      else:
+        features[action]["onDefend"] = -1
+      
       if self.getMinDisToPac(state) == 0:
         features[action]["disPac"] = 0
         features[action]["disFoodToDefend"] = -self.getMaxDisToMyFood(successor)
       else:       
         if state.getAgentState(self.index).scaredTimer > 0:
-          features[action]["disFoodToDefend"] = self.getMaxDisToMyFood(successor)*2
-          features[action]["disPac"] = self.getMinDisToPac(successor)*2
+          features[action]["disFoodToDefend"] = 0
+          features[action]["disPac"] = 0
+          features[action]["disPac_scared"] = self.getMinDisToPac(successor)
+          features[action]["disFoodToDefend_scared"] = self.getMaxDisToMyFood(successor)
         else:
-          features[action]["disFoodToDefend"] = -self.getMaxDisToMyFood(successor)
           features[action]["disPac"] = -self.getMinDisToPac(successor)   
+          features[action]["disFoodToDefend"] = -self.getMaxDisToMyFood(successor)*0.5
     return features
+
+  def isOnMySide(self, state):
+    if self.red:
+      if state.getAgentState(self.index).getPosition()[0] < self.mySide[0][0]:
+        return True
+      else:
+        return False
+    else:
+      if state.getAgentState(self.index).getPosition()[0] > self.mySide[0][0]:
+        return True
+      else:
+        return False
 
   def getMaxDisToMyFood(self, state):
     myFoodDis = [self.getMazeDistance(state.getAgentState(self.index).getPosition(), food) for food in self.getFoodYouAreDefending(state).asList()]
