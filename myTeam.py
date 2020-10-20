@@ -179,7 +179,7 @@ class QLearningCaptureAgent(CaptureAgent):
     for feature in weights[action]:
       oldW = weights[action][feature]
       weights[action][feature] = oldW + self.alfa * (reward + self.gamma * Qsuccessor - self.Q) * features[action][feature]
-    print("\nweights after update", weights)
+    # print("\nweights after update", weights)
     return weights
 
   def calReward(self,state,action):
