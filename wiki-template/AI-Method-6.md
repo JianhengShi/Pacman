@@ -1,6 +1,6 @@
 # AI Method 5 - Hybrid Approach: Approximate Q-Learning & Classical Planning 
 
-The goal of this approach was to make the Pacman agents learn policies through experience and win the game automatically by applying the learnt policies. To achieve the goal, we deployed a model-free reinforcement learning technique: approximate q-learning. A range of features were selected to describe the environment and a set of rewards were specified to encourage the right choices of actions. However, due to the inherent complexity of the problem, the features and reward used could not fully capture the states and the outcome of our initial attempt of using approximate q-learning alone was poor. Therefore, to improve the performance, we proposed a hybrid approach by combining approximate q-learning with classical planning.
+This method is an implementation of the future improvements proposed in the Approximate Q-Learning Approach section. By combining the reinforcement learning approach with classical planning techniques, we effectively improved the performance of our agents and successfully defeated the staff-medium agents.
 
 # Table of Contents
 - [Hybrid Approach: Approximate Q-Learning & Classical Planning ](#Hybrid-Approach)
@@ -14,12 +14,12 @@ The goal of this approach was to make the Pacman agents learn policies through e
 ## Hybrid Approach: Approximate Q-Learning & Classical Planning 
 
 ### Motivation  
-
+The motivation for this hybrid approach is to increase the efficiency of the agents when the agents fail to learn the optimal policy or the training time for learning such optimal policy is too long. For example, one of the major problems that the approximate q-learning agents had was that the agents would not carry the eaten food back home to score even after eating all the food. This was because the rewards for successful scoring were very sparce, and it would take a lot of time to train the agents. On the other hand, in situations like this where we knew what the optimal actions agents should take, classical planning is very efficient and effective.
 
 [Back to top](#table-of-contents)
 
 ### Application  
-
+The implementation of this hybrid approach can be found in [commit 623b202](https://github.com/COMP90054-classroom/contest-a-team/commit/623b2029ce2e02ecf1afbc671df5a9609a073c00).
 
 [Back to top](#table-of-contents)
 
