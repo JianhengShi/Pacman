@@ -44,6 +44,6 @@ Performance of Hill Climbing is limited. Thus, we just use it as a baseline impr
 
 ### Future improvements  
 
-Since pacman games are dynamic with many different status and situations. Therefore, different heuristic calculation methods can be used according to different situations. When choosing an action, first, set of features and their corresponding weights should be choosed by decision logic and game status, then calculate heuristics. This may improve the performance of this Hill Climbing method.
+Pacman games are dynamic with many different status and situations. Therefore, different heuristic calculation methods can be used according to different situations. When choosing an action, first, set of features and their corresponding weights should be choosed by decision logic and game status, then calculate heuristics. This may improve the performance of this Hill Climbing method.
 
 [Back to top](#table-of-contents)
