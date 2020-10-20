@@ -24,7 +24,7 @@ Considering these properties, we decided to try approximate q-learning as it is 
 [Back to top](#table-of-contents)
 
 ### Application  
-Our initial implementation of approximate Q-learning can be found in [commit b94fb39](https://github.com/COMP90054-classroom/contest-a-team/commit/b94fb391c167ea6df73f8bd0af930c1f29910c3d).
+Our implementation of approximate Q-learning can be found in [commit b94fb39](https://github.com/COMP90054-classroom/contest-a-team/commit/b94fb391c167ea6df73f8bd0af930c1f29910c3d).
 
 The intuition behind this implementation is to encourage the agents to play offense and to eat as many beans as possible when they are on the opponent’s side of the map and to play defense and eat opponent Pacman when they are on their home side. 
 Six features were used to represent the states in the game:
