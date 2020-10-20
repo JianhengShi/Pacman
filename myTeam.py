@@ -179,7 +179,7 @@ class QLearningCaptureAgent(CaptureAgent):
     for feature in weights[action]:
       oldW = weights[action][feature]
       weights[action][feature] = oldW + self.alfa * (reward + self.gamma * Qsuccessor - self.Q) * features[action][feature]
-    print("\nweights after update", weights)
+    # print("\nweights after update", weights)
     return weights
 
   def calReward(self,state,action):
@@ -436,7 +436,7 @@ class DefensiveAgent(QLearningCaptureAgent):
     
   def getFeatureValues(self, state, successors):
     features = self.initFeatures(self.allActions, self.defensiveFeatureKeys)
-    print(self.isOnMySide(state))
+    # print(self.isOnMySide(state))
     for action, successor in successors:
       features[action]["disPac_scared"] = 0
       features[action]["disFoodToDefend_scared"] = 0
