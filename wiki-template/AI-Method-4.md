@@ -3,7 +3,7 @@
 We also tried Upper Confidence Trees (MonteCarlo Tree Search with Upper Confidence Bounds) as our Pacman AI planning algorithm. 
 
 # Table of Contents
-- [Contents](#Contents)
+- [Upper Confidence Trees](#Upper-Confidence-Trees)
   * [Motivation](#motivation)
   * [Application](#application)
   * [Trade-offs](#trade-offs)     
@@ -11,7 +11,7 @@ We also tried Upper Confidence Trees (MonteCarlo Tree Search with Upper Confiden
      - [Disadvantages](#disadvantages)
   * [Future improvements](#future-improvements)
 
-## Contents  
+## Upper Confidence Trees 
 ### Motivation 
 
 As mentioned, Pacman game is a dynamic game with mutiple specific situations. Online planning such as MonteCarlo Tree Search sounds better for this kind of games compared with offline planning. At the same time, we know that MonteCarlo Tree Search already proved to has a satisfactory performance in a lot of Atari games. Therefore, we think MCTS should also perform well in pacman games. Also, with Upper Confidence Bounds technique, we can change exploration or exploitation of MCTS easily, to make the agent act more conservative or more greedy.
