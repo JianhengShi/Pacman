@@ -51,6 +51,6 @@ Moreover, due to the inherent complexity of the Pacman problem, we found it was 
 ### Future Improvements  
 Based on the problems we found during the implementation, we propose two improvements:
 1.	Make one agent play offense, while the other agent plays defense. This way, we can simplify the state space for each agent, and hopefully it will give us better interpretability of the agent behaviors. 
-2.	For policies that are hard to learn due to the lack of effective features, we can use classical planning approaches to tell the agent directly what to do. For example, for the scoring problem mentioned above, we can specify a threshold for food carried. Once the threshold is met, the agent will use a heuristic search to deliver the food home and score before switching back to using the learnt policies.
+2.	For policies that are hard to learn due to the lack of effective features and sparce rewards, we can use classical planning approaches to tell the agent directly what to do. For example, for the scoring problem mentioned above, we can specify a threshold for food carried. Once the threshold is met, the agent will use a heuristic search to deliver the food home and score before switching back to using the learnt policies.
 
 [Back to top](#table-of-contents)
