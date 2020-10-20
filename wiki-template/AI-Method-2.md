@@ -28,11 +28,11 @@ Our initial implementation of approximate Q-learning can be found in [commit b94
 
 The intuition behind this implementation is to encourage the agents to play offense and to eat as many beans as possible when they are on the opponent’s side of the map and to play defense and eat opponent Pacman when they are on their home side. 
 Six features were used to represent the states in the game:
-•	Features "distanceToFood" and "foodToEat" describe the distance from the position of the agent Pacman to the closest food and if the agent ate food.
-•	Feature “disNotGo” describes the minimum distance between the agent Pacman and some predefined dangerous places on the map such as areas around the ghosts or dead-end alley.
-•	Feature “disPac” describes the distance between the agent Ghost and the closest observable opponent Pacman.
-•	Feature “disCap” describes the distance between the agent Pacman and the closest capsules on the map.
-•	Feature “toScore” describes how far the agent Pacman is from the home and how much food it carries.
+*	Features "distanceToFood" and "foodToEat" describe the distance from the position of the agent Pacman to the closest food and if the agent ate food.
+*	Feature “disNotGo” describes the minimum distance between the agent Pacman and some predefined dangerous places on the map such as areas around the ghosts or dead-end alley.
+*	Feature “disPac” describes the distance between the agent Ghost and the closest observable opponent Pacman.
+*	Feature “disCap” describes the distance between the agent Pacman and the closest capsules on the map.
+*	Feature “toScore” describes how far the agent Pacman is from the home and how much food it carries.
 Since there are five actions in the problem domain and six state features per action, we ended up with a feature vector with 25 features in total. 
 Positive rewards were given when the agent Pacman ate food or capsule, or the agent Ghost ate the opponent Pacman. Negative rewards were given when the agent Pacman was at the predefined dangerous places or got eaten by the opponent Ghost.
 
