@@ -14,7 +14,7 @@ This method is an implementation of the future improvements proposed in the Appr
 ## Hybrid Approach: Approximate Q-Learning & Classical Planning 
 
 ### Motivation  
-The motivation for this hybrid approach is to increase the efficiency of the agents when the agents fail to learn the optimal policy or the training time for learning such optimal policy is too long. For example, one of the major problems that the approximate q-learning agents had was that the agents would not carry the eaten food back home to score even after eating all the food. This was because the rewards for successful scoring were very sparce, and it would take a lot of time to train the agents. On the other hand, in situations like this where we knew what the optimal actions agents should take, classical planning is very efficient and effective.
+The motivation for this hybrid approach is to increase the efficiency of the agents when the agents fail to learn the optimal policy or the training for learning such an optimal policy takes too much time. For example, one of the major problems that the approximate q-learning agents had was that the agents would not carry the eaten food back home to score even after eating all the food. This was because the rewards for successful scoring were very sparse, and it would take a lot of time to train the agents. On the other hand, in situations like this where we knew what the optimal actions agents should take, classical planning is very efficient and effective.
 
 [Back to top](#table-of-contents)
 
