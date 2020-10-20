@@ -82,24 +82,31 @@ class QLearningCaptureAgent(CaptureAgent):
     # print(self.features)
     self.offensiveWeights = self.initWeights(self.allActions, self.offensiveFeatureKeys)
     self.defensiveWeights = self.initWeights(self.allActions, self.defensiveFeatureKeys)
-    # self.weights ={'West': {'distanceToFood': 1.0448083829761436, 'foodToEat': 1.0, 'ghostInRange': -2.972108795643406}, 'North': {'distanceToFood': 1.048234867461356, 'foodToEat': 1.0, 'ghostInRange': -4.905922613102293}, 'East': {'distanceToFood': 0.9992496152265813, 'foodToEat': 1.0, 'ghostInRange': 0.8780595764113851}, 'South': {'distanceToFood': 1.0886294360444848, 'foodToEat': 1.501473430614396, 'ghostInRange': -8.783971438723631}, 'Stop': {'distanceToFood': 1.0044728576407824, 'foodToEat': 1.0, 'ghostInRange': 0.011546752765986346}}
+    # if self.red:
+    #   self.offensiveWeights = {'West': {'distanceToFood': 1.0190724247435337, 'foodToEat': 4.1958225635787905, 'disNotGo': 1.0156377321178731, 'ghostInRange': -0.016819800863038022}, 'North': {'distanceToFood': 0.920298113532667, 'foodToEat': 6.365757489774838, 'disNotGo': 1.6056778519918165, 'ghostInRange': -1.5495175318982441}, 'East': {'distanceToFood': 0.730999669772557, 'foodToEat': 4.09100390585325, 'disNotGo': 1.3550785176713904, 'ghostInRange': -1.699888001511586}, 'South': {'distanceToFood': 0.9632151655333985, 'foodToEat': 4.5643647156843095, 'disNotGo': 0.947592074670046, 'ghostInRange': -2.3396233409009057}, 'Stop': {'distanceToFood': 1.000022802983676, 'foodToEat': 1.0, 'disNotGo': 0.990822950670677, 'ghostInRange': -2.4090518892924004}}
+    #   self.defensiveWeights = {'West': {'disPac': 0.9995891249694154, 'onDefend': 0.7286760134763696, 'disFoodToDefend': 1.000027817737563, 'distanceToFood': 1.0}, 'North': {'disPac': 0.9928425371641709, 'onDefend': 0.736070835410189, 'disFoodToDefend': 0.999787151985802, 'distanceToFood': 1.0}, 'East': {'disPac': 1.0006256686266357, 'onDefend': 0.7461377230837017, 'disFoodToDefend': 0.9998531720543097, 'distanceToFood': 1.0}, 'South': {'disPac': 0.9984402553814196, 'onDefend': 0.7187924367900846, 'disFoodToDefend': 0.9989345116712985, 'distanceToFood': 1.0}, 'Stop': {'disPac': 1.0018871553938655, 'onDefend': 0.7374011659424449, 'disFoodToDefend': 1.0000268404223416, 'distanceToFood': 1.0}}
+    # else:
+    #   self.offensiveWeights = {'West': {'distanceToFood': 0.8829870551965651, 'foodToEat': 4.223295293681011, 'disNotGo': 0.9799905995707912, 'ghostInRange': -2.0244860324419065}, 'North': {'distanceToFood': 0.9642070881561703, 'foodToEat': 4.035570890011501, 'disNotGo': 0.9105651326891779, 'ghostInRange': -7.03471892522429}, 'East': {'distanceToFood': 1.0161174407483016, 'foodToEat': 5.349758748151534, 'disNotGo': 0.9442628077382, 'ghostInRange': -4.837427444510008}, 'South': {'distanceToFood': 0.9084840999974431, 'foodToEat': 4.07015200765776, 'disNotGo': 0.9850700026348445, 'ghostInRange': -2.209448882896262}, 'Stop': {'distanceToFood': 1.0, 'foodToEat': 1.0, 'disNotGo': 0.9949068629413839, 'ghostInRange': -5.670802336990366}}
+    #   self.defensiveWeights = {'West': {'disPac': 0.9991711436044567, 'onDefend': 1.0, 'disFoodToDefend': 0.9994280701913769, 'distanceToFood': 1.0}, 'North': {'disPac': 0.9996645554630801, 'onDefend': 1.0, 'disFoodToDefend': 0.9992189000082605, 'distanceToFood': 1.0}, 'East': {'disPac': 0.9997476256306012, 'onDefend': 1.0, 'disFoodToDefend': 0.9999983552868402, 'distanceToFood': 1.0}, 'South': {'disPac': 0.996045561608993, 'onDefend': 1.0, 'disFoodToDefend': 0.9999895840006816, 'distanceToFood': 1.0}, 'Stop': {'disPac': 0.9996967639507508, 'onDefend': 1.0, 'disFoodToDefend': 0.999998057698827, 'distanceToFood': 1.0}}
     # self.reward = 0
     # self.actionTaken = None
     self.alfa = 0.5
     self.gamma = 0.9
-    self.epsilon = 0.00 
+    self.epsilon = 0.00
     self.Q = 0
     self.QsPrime = 0
     self.spl = getSpl(gameState, self.red)
     self.width, self.height = gameState.getWalls().width, gameState.getWalls().height   
     self.mySide = getMyLine(gameState, self.red) 
     self.totalFood = len(self.getDots(gameState))
+    self.eachRunFood = len(self.getDots(gameState))//3
     self.my_dots = self.getFoodYouAreDefending(gameState).asList()
+    self.preScore = 0
 
   def chooseAction(self, gameState):
     state = gameState    
     if self.isOffensive():
-      if (len(self.getDots(state)) <= 2) or (state.data.timeleft < 80 and state.getAgentState(self.index).numCarrying > 0) or (state.getAgentState(self.index).numCarrying > 6):
+      if (len(self.getDots(state)) <= 2) or (state.data.timeleft < 50 and state.getAgentState(self.index).numCarrying > 0) or (state.getAgentState(self.index).numCarrying > self.eachRunFood):
         optiAct = self.goHome(state)
       else:
         legalActions = state.getLegalActions(self.index)  
@@ -172,7 +179,7 @@ class QLearningCaptureAgent(CaptureAgent):
     for feature in weights[action]:
       oldW = weights[action][feature]
       weights[action][feature] = oldW + self.alfa * (reward + self.gamma * Qsuccessor - self.Q) * features[action][feature]
-    # print("weights after update", weights)
+    print("\nweights after update", weights)
     return weights
 
   def calReward(self,state,action):
@@ -180,9 +187,7 @@ class QLearningCaptureAgent(CaptureAgent):
     successor = self.getSuccessor(state, action)
     if successor.getAgentState(self.index).getPosition() in self.getFood(state).asList():
       reward += 4
-      # print("eat bean reward")
     if successor.getAgentState(self.index).getPosition() in self.notGo(state):
-      # print("ghost reward")
       reward -= 3
     if not successor.getAgentState(self.index).isPacman and successor.getAgentState(self.index).getPosition() in self.getPacPos(state):
       reward += 4
@@ -441,11 +446,11 @@ class DefensiveAgent(QLearningCaptureAgent):
         features[action]["disFoodToDefend"] = -self.getMaxDisToMyFood(successor)
       else:       
         if state.getAgentState(self.index).scaredTimer > 0:
-          features[action]["disFoodToDefend"] = 0
+          features[action]["disFoodToDefend"] = self.getMaxDisToMyFood(successor)*2
           features[action]["disPac"] = self.getMinDisToPac(successor)*2
         else:
-          features[action]["disPac"] = -self.getMinDisToPac(successor)   
           features[action]["disFoodToDefend"] = -self.getMaxDisToMyFood(successor)
+          features[action]["disPac"] = -self.getMinDisToPac(successor)   
     return features
 
   def getMaxDisToMyFood(self, state):
