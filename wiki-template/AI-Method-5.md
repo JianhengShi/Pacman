@@ -33,7 +33,7 @@ Six features were used to represent the states in the game:
 *	Feature “disPac” describes the distance between the agent Ghost and the closest observable opponent Pacman.
 *	Feature “disCap” describes the distance between the agent Pacman and the closest capsules on the map.
 *	Feature “toScore” describes how far the agent Pacman is from the home and how much food it carries.
-Since there are five actions in the problem domain and six state features per action, we ended up with a feature vector with 25 features in total. 
+Since there were five actions in the problem domain and six state features per action, we ended up with a feature vector with 25 features in total. 
 Positive rewards were given when the agent Pacman ate food or capsule, or the agent Ghost ate the opponent Pacman. Negative rewards were given when the agent Pacman was at the predefined dangerous places or got eaten by the opponent Ghost.
 
 [Back to top](#table-of-contents)
