@@ -32,5 +32,7 @@ Generally, our agent's action chosing cases goes into three functions: Eat capsu
 
 
 ## Offense
+Most comments above is about the Offense strategy.
 
 ## Defense
+For defense cases, the agent first find a path to enemy's Pacman. If there is no feasible path, then the agent will go to location of last dot eaten by enemy's Pacman.
