@@ -172,7 +172,7 @@ class Agent(CaptureAgent):
         '''
         if gameState.getAgentState(self.index).scaredTimer > 0:
             return False
-        if len(self.getDots(gameState)) <= 2 and self.getScore(gameState) >0 and gameState.getAgentState(self.index).numCarrying == 0:
+        if len(self.getDots(gameState)) <= 2 and gameState.getAgentState(self.index).numCarrying == 0:
             return True
         # if oppoPac is False and gameState.getAgentState(self.index).isPacman is False and self.getScore(gameState) >0:
         #     return True
@@ -384,6 +384,143 @@ class Agent(CaptureAgent):
                     return self.catch(gameState)
             '''
         return self.aStarSearch(gameState, gameState.getAgentState(self.index).getPosition(), [out], self.notGo2(gameState))[0]
+
+    def eatDotsTest2(self, gameState):
+        '''
+        Return an action to eat dots.
+        Logistic is: go to the nearest food, if teammate goes to that position either, 
+        change to chase the third nearest food.
+        去最近的食物，如果队友也去，那么去第三近的
+        '''
+        if self.go_home:
+            return self.goHome(gameState)
+        if self.seduction==True:
+            g_list=self.enemyGIndex(gameState)
+            if g_list==None or len(g_list)==0:
+                    self.seduction==False
+            safe=True
+            for i in self.enemyGIndex(gameState):
+                if self.getMazeDistance(gameState.getAgentState(self.index).getPosition(), gameState.getAgentState(i).getPosition())<=4:
+                    safe=False
+            if safe==True:
+                self.seduction==False
+
+            if self.index<self.anotherIndex(gameState):
+                if gameState.getAgentState(self.index).getPosition()==getMyLine(gameState, self.red)[len(getMyLine(gameState, self.red))-1]:
+                    self.seduction=False
+                else:
+                    top=getMyLine(gameState, self.red)[len(getMyLine(gameState, self.red))-1]
+                    path= self.aStarSearch(gameState, gameState.getAgentState(self.index).getPosition(), [top], self.notGo2(gameState))
+                    if path is not None and len(path)>0:
+                        return path[0]
+            if self.index>self.anotherIndex(gameState):
+                if gameState.getAgentState(self.index).getPosition()==getMyLine(gameState, self.red)[0]:
+                    self.seduction=False
+                else:
+                    bottom=getMyLine(gameState, self.red)[0]
+                    path= self.aStarSearch(gameState, gameState.getAgentState(self.index).getPosition(), [bottom], self.notGo2(gameState))
+                    if path is not None and len(path)>0:
+                        return path[0]
+
+        ls = []
+        if len(self.getDots(gameState)) > 15:
+            dic = dict()
+            for i in self.getDots(gameState):
+                dic.update({i: self.getMazeDistance(gameState.getAgentState(self.index).getPosition(), i)})
+            ls1 = []
+            for i in sorted(dic.items(), key=operator.itemgetter(1)):
+                ls1.append(i[0])
+            ls = ls1[0: 15]
+        else:
+            ls = self.getDots(gameState)
+        dic3 = dict()
+        for i in ls:
+            if self.aStarSearch(gameState, gameState.getAgentState(self.index).getPosition(), [i], self.notGo(gameState)) is None:
+                continue
+            dic3.update({i: len(self.aStarSearch(gameState, gameState.getAgentState(self.index).getPosition(), [i], self.notGo(gameState)))})
+        
+        if len(dic3) == 0:
+            self.seduction=True
+            if self.index<self.anotherIndex(gameState):
+                top=getMyLine(gameState, self.red)[len(getMyLine(gameState, self.red))-1]
+                path= self.aStarSearch(gameState, gameState.getAgentState(self.index).getPosition(), [top], self.notGo2(gameState))
+                if path is not None and len(path)>0:
+                    return path[0]
+            else:
+                bottom=getMyLine(gameState, self.red)[0]
+                path= self.aStarSearch(gameState, gameState.getAgentState(self.index).getPosition(), [bottom], self.notGo2(gameState))
+                if path is not None and len(path)>0:
+                    return path[0]
+            return self.goHome(gameState)
+        out = sorted(dic3.items(), key=operator.itemgetter(1))[0][0]
+        out_val = sorted(dic3.items(), key=operator.itemgetter(1))[0][1]
+
+        dic4 = dict()
+        ls2 = []
+        if len(self.getDots(gameState)) > 15:
+            dic = dict()
+            for i in self.getDots(gameState):
+                dic.update({i: self.getMazeDistance(gameState.getAgentState(self.anotherIndex(gameState)).getPosition(), i)})
+            ls1 = []
+            for i in sorted(dic.items(), key=operator.itemgetter(1)):
+                ls1.append(i[0])
+            ls2 = ls1[0: 15]
+        else:
+            ls2 = self.getDots(gameState)
+
+        for eat in ls2:
+            path = self.aStarSearch(gameState, gameState.getAgentState(self.anotherIndex(gameState)).getPosition(), [eat], self.notGo2(gameState))
+            if path is None:
+                continue
+            dic4.update({eat: len(path)})
+        if len(dic4) != 0:
+            out2 = sorted(dic4.items(), key=operator.itemgetter(1))[0][0]
+            out2_val = sorted(dic4.items(), key=operator.itemgetter(1))[0][1]
+            '''
+            if out == out2 and out_val > out2_val and len(dic3) > int(len(self.my_dots)*2/3):
+                out = sorted(dic3.items(), key=operator.itemgetter(1))[1][0]
+            if out == out2 and out_val > out2_val and len(dic3) <= int(len(self.my_dots)*2/3): 
+                out = sorted(dic3.items(), key=operator.itemgetter(1))[len(dic3)-1][0]
+            
+            '''
+            dic5=dict()
+            for i in range(min(len(dic3),len(dic4))):
+                if sorted(dic3.items(), key=operator.itemgetter(1))[i][0] != sorted(dic4.items(), key=operator.itemgetter(1))[i][0]:
+                    dic5.update({sorted(dic3.items(), key=operator.itemgetter(1))[i][0]:sorted(dic3.items(), key=operator.itemgetter(1))[i][1]})
+                if sorted(dic3.items(), key=operator.itemgetter(1))[i][0] == sorted(dic4.items(), key=operator.itemgetter(1))[i][0] and sorted(dic3.items(), key=operator.itemgetter(1))[i][1] < sorted(dic4.items(), key=operator.itemgetter(1))[i][1]:
+                    dic5.update({sorted(dic3.items(), key=operator.itemgetter(1))[i][0]:sorted(dic3.items(), key=operator.itemgetter(1))[i][1]})
+
+            if len(dic5)!=0:
+                out = sorted(dic5.items(), key=operator.itemgetter(1))[0][0]
+            else:
+                out = sorted(dic3.items(), key=operator.itemgetter(1))[0][0]
+            # else:
+            #     if self.index<self.anotherIndex(gameState):
+            #         top=getMyLine(gameState, self.red)[len(getMyLine(gameState, self.red))-1]
+            #         path = self.aStarSearch(gameState, gameState.getAgentState(self.index).getPosition(), [top], self.notGo(gameState))
+            #         if path is not None and len(path)>0:
+            #             return path[0]
+            #     else:
+            #         bottom=getMyLine(gameState, self.red)[0]
+            #         path = self.aStarSearch(gameState, gameState.getAgentState(self.index).getPosition(), [bottom], self.notGo(gameState))
+            #         if path is not None and len(path)>0:
+            #             return path[0]
+            #     return self.goHome(gameState)
+            # if out == out2 and out_val > out2_val and len(dic3) >=2:
+                
+            #     out = sorted(dic3.items(), key=operator.itemgetter(1))[1][0]
+            
+            
+            '''
+            if len(self.getDots(gameState)) <= 3 and out_val > out2_val:
+                if gameState.getAgentState(self.index).numCarrying > 0:
+                    
+                    return self.goHome(gameState)
+                else:
+                    
+                    return self.catch(gameState)
+            '''
+        return self.aStarSearch(gameState, gameState.getAgentState(self.index).getPosition(), [out], self.notGo(gameState))[0]
 
     def eatDots(self, gameState):
         '''
@@ -638,14 +775,20 @@ class Agent(CaptureAgent):
         for i in self.enemyGIndex2(self.state):
             for j in self.enemyGIndex2(gameState):
                 if i == j:
-                    if self.ifAtDeadRoute(gameState):
-                        '''
-                        if self.getMazeDistance(gameState.getAgentState(self.index).getPosition(), gameState.getAgentState(j).getPosition()) <= self.getMazeDistance(gameState.getAgentState(self.index).getPosition(), gameState.getAgentState(i).getPosition()):
+                    # if self.ifAtDeadRoute(gameState):
+                        
+                    #     if self.getMazeDistance(gameState.getAgentState(self.index).getPosition(), gameState.getAgentState(j).getPosition()) <= self.getMazeDistance(gameState.getAgentState(self.index).getPosition(), gameState.getAgentState(i).getPosition())<=5:
 
-                            return True
-                            '''
-                    if self.getMazeDistance(gameState.getAgentState(self.index).getPosition(), gameState.getAgentState(j).getPosition()) <= self.getMazeDistance(gameState.getAgentState(self.index).getPosition(), gameState.getAgentState(i).getPosition()) <= 4:
-                        return True          
+                    #         return True
+                            
+                    if self.getMazeDistance(gameState.getAgentState(self.index).getPosition(), gameState.getAgentState(j).getPosition()) <= self.getMazeDistance(gameState.getAgentState(self.index).getPosition(), gameState.getAgentState(i).getPosition()) <= 6:
+                        return True
+                    if self.getMazeDistance(gameState.getAgentState(self.anotherIndex(gameState)).getPosition(), gameState.getAgentState(j).getPosition()) <= self.getMazeDistance(gameState.getAgentState(self.anotherIndex(gameState)).getPosition(), gameState.getAgentState(i).getPosition()) <= 6:
+                        for i in self.getCapsules(gameState):
+                            if self.getMazeDistance(gameState.getAgentState(self.index).getPosition(), i) <= 3 and self.aStarSearch(gameState, gameState.getAgentState(self.index).getPosition(), [i], self.notGo2(gameState)) is not None:
+
+                                return True
+          
         return False
 
     def luckyWay(self, gameState):
@@ -694,7 +837,7 @@ class Agent(CaptureAgent):
         if a is not None:
             return self.aStarSearch(gameState, gameState.getAgentState(self.index).getPosition(), [a], self.notGo2(gameState))[0]
         if gameState.getAgentState(self.index).numCarrying ==0:
-            return self.eatDotsTest(gameState)
+            return self.eatDotsTest2(gameState)
         else:
             if len(way) == 0:
                 return self.luckyWay(gameState)
@@ -933,7 +1076,10 @@ class Agent(CaptureAgent):
         line = getMyLine(gameState, self.red)
         way = None
         a = 9999999
-        dp1=dp+[anop]
+        if anop not in getMyLine(gameState,self.red) and anop not in getOppoLine(gameState,self.red):
+            dp1=dp+[anop]
+        else:
+            dp1=dp
         for i in line:
             path = self.aStarSearch(gameState, p, [i], dp1)
             if path is not None and len(path) < a:
