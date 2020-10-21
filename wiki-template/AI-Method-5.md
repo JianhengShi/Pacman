@@ -44,7 +44,7 @@ As discussed in the motivation section, there are three main advantages of using
 
 #### *Disadvantages*
 Like other reinforcement learning approaches, Q-learning suffers from poor interpretability, which makes debugging and quality assurance much harder. When we observed unexpected behaviors of the agents, it was difficult to reason the causes or come up with improvements, especially when there were many features. 
-Moreover, due to the inherent complexity of the Pacman problem, we found some policies take a longer time to learn due to lack of representative features and sparse reward. For example, in this implementation, the agent Pacman failed to learn when to deliver the eaten food home for scoring with the amount of training we conducted. 
+Moreover, due to the inherent complexity of the Pacman problem, we found some policies take a longer time to learn due to the lack of representative features and sparse reward. For example, in this implementation, the agent Pacman failed to learn when to deliver the eaten food home for scoring with the amount of training we conducted. 
 
 [Back to top](#table-of-contents)
 
