@@ -23,7 +23,8 @@ The implementation of this hybrid approach can be found in [commit 623b202](http
 
 First, classical planning was used when the agents fail to learn optimal policies due to sparse reward. More specifically, in this implementation, the heuristic searching was used in two cases: guiding the agent Pacman to deliver food home to score and guiding the agent Ghost to where our food was eaten by the opponents. 
 
-Second, instead of having the same agent play both defense and offense roles, we had one agent play offense only, while the other agent plays defense only in this implementation. The agent that played offense followed an offensive strategy that focused on scoring and avoiding been eaten by opponent Ghosts. To describe this problem domain,  we used three features that were used in the approximate Q-learning approach previously, namely “disNotGo”, “foodToEat”, and “distanceToFood”, and introduced a new feature “ghostInRange”, which describes the minimum distance between the agent Pacman and the observable opponent Ghosts. On the other hand, the agent that played defense followed a defensive strategy that focused on eating the opponent Pacman. Since the agent can only observe opponents within a certain range, we used the positions of the food that was eaten by the opponents to locate the area where the opponents might be. Features that were useful in representing this agent’s state space are: 
+Second, instead of having the same agent play both defense and offense roles, we had one agent play offense only, while the other agent plays defense only in this implementation. The agent that played offense followed an offensive strategy that focused on scoring and avoiding been eaten by opponent Ghosts. To describe this problem domain,  we used three features that were used in the approximate Q-learning approach previously, namely “disNotGo”, “foodToEat”, and “distanceToFood”, and introduced a new feature “ghostInRange”, which describes the minimum distance between the agent Pacman and the observable opponent Ghosts. 
+On the other hand, the agent that played defense followed a defensive strategy that encourages the agent Ghost to always move towards the opponent Pacman or where our food is when the capsules are not eaten but move away from them when the opponents eat the capsules. Since the agent can only observe opponents within a certain range, we used the positions of the food that was eaten by the opponents to locate the area where the opponents might be. Features that were useful in representing this agent’s state space are: 
 *	Feature “disPac” describes the distance between the agent Ghost and the closest observable opponent Pacman.
 *	Feature “onDefend” describes whether the agent is on its home side.
 *	Feature "disFoodToDefend" describes the maximum distance between the agent Ghost and the food on the home side which we need to defend.
@@ -36,7 +37,8 @@ This approach has effectively improved the performance of the agents. The classi
 Moreover, by having one agent play one role only, the problem domain for each agent was simplified and the interpretability of the agent behaviors was improved. 
 
 #### *Disadvantages*
-
+The use of classical planning was a quick fix for the problems we identified in the approximate Q-learning, but it had its limitations. The agents switched between reinforcement learning and classical planning following pre-defined rules, which may lead to non-optimal actions and hence the loss of efficiency. 
+Additionally, it was also observed that defense agents were not very efficient since when they get scared, all they do is to stay away from the opponent Pacman, which was not productive. 
 
 [Back to top](#table-of-contents)
 
