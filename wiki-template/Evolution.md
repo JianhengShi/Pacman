@@ -26,18 +26,76 @@ As mentioned in [AI-Method-1](https://github.com/COMP90054-classroom/contest-a-t
 | First body part | Second cell  |
 | Second line     | foo          |
 ----
-## My Second Agent - Approach fOO
+## My Second Agent - Second Version: Less Greedy
 ----
 
+Improved:
+* aaaaaaaaaaaa
+* bbbbbbbbbbbb
+* cccccccccccc
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 ### Demo
 
-![Demo 1](images/demo1.gif)
+#### Competition results: Position - 2/14 | Percentile - 14% | Above staff team top
 
-#### Competition results: Position - 21/37 | Percentile - 57%
+![Demo 1](images/9-27-1.png)
 
-![Demo 1](images/standing1.png)
+#### Strategy summary
+
+| Pros | Cons |
+|-----------------|:-------------|
+| First body part | Second cell  |
+| Second line     | foo          |
+----
+## My Third Agent - Third Version: Stuck Fix
+----
+
+Improved:
+* Stuck fix
+
+### Demo
+
+#### Competition results: Position - 1/19 | Percentile - 5% | Above staff team super
+
+![Demo 1](images/9-30.png)
+
+#### Strategy summary
+
+| Pros | Cons |
+|-----------------|:-------------|
+| First body part | Second cell  |
+| Second line     | foo          |
+----
+## My Fourth Agent - Fourth Version: Add More Defence
+----
+
+Added:
+* More Defence
+
+### Demo
+
+#### Competition results: Position - 14/81 | Percentile - 17% | Above staff team top
+
+![Demo 1](images/10-13.png)
+
+#### Strategy summary
+
+| Pros | Cons |
+|-----------------|:-------------|
+| First body part | Second cell  |
+| Second line     | foo          |
+----
+## My Fifth Agent - Fifth Version: Improve Eat-Dots Logic
+----
+
+Improved:
+* Change eat dots logic
+
+### Demo
+
+#### Competition results: Position - 1/86 | Percentile - 1% | Above staff team super
+
+![Demo 1](images/10-19.png)
 
 #### Strategy summary
 
