@@ -43,6 +43,6 @@ Additionally, it was also observed that defense agents were not very efficient s
 [Back to top](#table-of-contents)
 
 ### Future Improvements  
-
+Instead of using classical planning, another approach we could try is to use reward shaping to help the agent to achieve better learning outcomes despite the sparse reward. Additionally, we could further improve the defense strategy. After the opponent Pacman eats capsules, there is no point defending and it would be more productive if the defense agent could play offense while it is scared. 
 
 [Back to top](#table-of-contents)
