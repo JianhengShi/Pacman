@@ -5,9 +5,9 @@ Here is evolution of our agent with Heuristic Search Algorithm.
 ## My First Agent - First Version with Heuristic Search Algorithm
 
 As mentioned in [AI-Method-1](https://github.com/COMP90054-classroom/contest-a-team/blob/master/wiki-template/AI-Method-1.md) and [Design-Choices](https://github.com/COMP90054-classroom/contest-a-team/blob/master/wiki-template/Design-Choices.md), our initial agent laid the foundation for all the subsequent improvements. It is using A* search algorithm with action decision logic and map reading functions. Also, we do not seperate offense and defense agent, insteadly, our agent judges its action by the game state (in fact, our agent spends most of the time on attack). Just like any other foundimental approach, it has many shortcomes, including but not limited to:
-- 
-- 
-- 
+* aaaaaa
+* bbbbbbb
+* cccccccc
 
 
 
