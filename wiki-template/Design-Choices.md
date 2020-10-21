@@ -2,6 +2,12 @@
 
 Through experiments, we find that aggressive strategy of eating dots is more effective, namely, both agents play the role of attackers at most of the time. Because when facing intelligent opponents, defense is very difficult and inefficient. As the saying goes: attack is the best defense. You can't win the Pacman game by defending.
 
+In addition, we compared several AI planning algorithms or hybrid algorithms with their performance in Pacman game. For seeing implemetation of these methods, please go to seperate wiki file of each method. 
+
+![Comparison of Methods](images/Methods_comparison.png)
+
+In the end, we chose the first method with the best performance.
+
 ## General Comments
 
 First, our program will analyze the map, including the inherent danger zone (Dead end) and their exit. In some subsequent cases, the agent will be prevented from entering such an area. At the same time we give some useful help functions.
@@ -10,6 +16,8 @@ First, our program will analyze the map, including the inherent danger zone (Dea
 As shown in the figure, green tiles are dead ends and bule tiles are their exit.
 
 In the running process of this dynamic Pacman game, we need to constantly judge the dangerous position for our agent. It may be different for different cases, including but not limited to the dead end mentioned above or locations near the enemy Ghost.
+
+![Dangerous Area for one of our Agent in this Game State](images/Dangerous_area.png)
 
 With dangerous area and gamestate, agent action is determined by the cases subdivided by the logic of a decision tree.
 ![Action Choosing Decision Logic](images/action_choosing_DT.png)
