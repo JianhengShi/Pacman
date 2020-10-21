@@ -14,25 +14,35 @@ This method is an implementation of the future improvements proposed in the Appr
 ## Hybrid Approach: Approximate Q-Learning & Classical Planning 
 
 ### Motivation  
-The motivation for this hybrid approach is to increase the efficiency of the agents when the agents fail to learn the optimal policy or the training for learning such an optimal policy takes too much time. For example, one of the major problems that the approximate q-learning agents had was that the agents would not carry the eaten food back home to score even after eating all the food. This was because the rewards for successful scoring were very sparse, and it would take a lot of time to train the agents. On the other hand, in situations like this where we knew what the optimal actions agents should take, classical planning is very efficient and effective.
+The motivation for this hybrid approach is to increase the efficiency of the agents when they fail to derive optimal policy from learning. There are many reasons for such failures, such as unrepresentative state features, sparse reward, or lack of training. When such failure occurs, the effectiveness and efficiency of the agents suffer dramatically. For example, one of the major problems that the approximate q-learning agents had was that the agents failed to learn the eaten food needed to be carried back home for scoring, which directly impacted the performance of the agents. Therefore, in situations like this, the agents need an alternative method to choose actions and this is when classical planning comes into play.
 
 [Back to top](#table-of-contents)
 
 ### Application  
-The implementation of this hybrid approach can be found in [commit 623b202](https://github.com/COMP90054-classroom/contest-a-team/commit/623b2029ce2e02ecf1afbc671df5a9609a073c00).
+The implementation of this hybrid approach can be found in [commit 623b202](https://github.com/COMP90054-classroom/contest-a-team/commit/623b2029ce2e02ecf1afbc671df5a9609a073c00). Comparing to the approximate Q-learning approach, two major changes were made. 
+
+First, classical planning was used when the agents fail to learn optimal policies due to sparse reward. More specifically, in this implementation, the heuristic searching was used in two cases: guiding the agent Pacman to deliver food home to score and guiding the agent Ghost to where our food was eaten by the opponents. 
+
+Second, instead of having the same agent play both defense and offense roles, we had one agent play offense only, while the other agent plays defense only in this implementation. The agent that played offense followed an offensive strategy that focused on scoring and avoiding been eaten by opponent Ghosts. To describe this problem domain,  we used three features that were used in the approximate Q-learning approach previously, namely “disNotGo”, “foodToEat”, and “distanceToFood”, and introduced a new feature “ghostInRange”, which describes the minimum distance between the agent Pacman and the observable opponent Ghosts. 
+On the other hand, the agent that played defense followed a defensive strategy that encourages the agent Ghost to always move towards the opponent Pacman or where our food is when the capsules are not eaten but move away from them when the opponents eat the capsules. Since the agent can only observe opponents within a certain range, we used the positions of the food that was eaten by the opponents to locate the area where the opponents might be. Features that were useful in representing this agent’s state space are: 
+*	Feature “disPac” describes the distance between the agent Ghost and the closest observable opponent Pacman.
+*	Feature “onDefend” describes whether the agent is on its home side.
+*	Feature "disFoodToDefend" describes the maximum distance between the agent Ghost and the food on the home side which we need to defend.
 
 [Back to top](#table-of-contents)
 
 ### Trade-offs  
 #### *Advantages*  
-
+This approach has effectively improved the performance of the agents. The classical planning techniques complemented the approximate Q-learning by providing a relatively efficient action plan in certain situations where agents failed to derive optimal policies from learning. 
+Moreover, by having one agent play one role only, the problem domain for each agent was simplified and the interpretability of the agent behaviors was improved. 
 
 #### *Disadvantages*
-
+The use of classical planning was a quick fix for the problems we identified in the approximate Q-learning, but it had its limitations. The agents switched between reinforcement learning and classical planning following pre-defined rules, which may lead to non-optimal actions and hence the loss of efficiency. 
+Additionally, it was also observed that defense agents were not very efficient since when they get scared, all they do is to stay away from the opponent Pacman, which was not productive. 
 
 [Back to top](#table-of-contents)
 
 ### Future Improvements  
-
+Instead of using classical planning, another approach we could try is to use reward shaping to help the agent to achieve better learning outcomes despite the sparse reward. Additionally, we could further improve the defense strategy. After the opponent Pacman eats capsules, there is no point defending and it would be more productive if the defense agent could play offense while it is scared. 
 
 [Back to top](#table-of-contents)

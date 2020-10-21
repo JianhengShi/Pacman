@@ -67,6 +67,7 @@ class Agent(CaptureAgent):
         self.stuckThreshold = 15
         self.safeBreakTie = 2
         self.fortune=0
+        self.seduction=False
   
     def chooseAction(self, gameState):  
         '''
@@ -256,6 +257,34 @@ class Agent(CaptureAgent):
         '''
         if self.go_home:
             return self.goHome(gameState)
+        if self.seduction==True:
+            g_list=self.enemyGIndex(gameState)
+            if g_list==None or len(g_list)==0:
+                    self.seduction==False
+            safe=True
+            for i in self.enemyGIndex(gameState):
+                if self.getMazeDistance(gameState.getAgentState(self.index).getPosition(), gameState.getAgentState(i).getPosition())<=4:
+                    safe=False
+            if safe==True:
+                self.seduction==False
+
+            if self.index<self.anotherIndex(gameState):
+                if gameState.getAgentState(self.index).getPosition()==getMyLine(gameState, self.red)[len(getMyLine(gameState, self.red))-1]:
+                    self.seduction=False
+                else:
+                    top=getMyLine(gameState, self.red)[len(getMyLine(gameState, self.red))-1]
+                    path= self.aStarSearch(gameState, gameState.getAgentState(self.index).getPosition(), [top], self.notGo2(gameState))
+                    if path is not None and len(path)>0:
+                        return path[0]
+            if self.index>self.anotherIndex(gameState):
+                if gameState.getAgentState(self.index).getPosition()==getMyLine(gameState, self.red)[0]:
+                    self.seduction=False
+                else:
+                    bottom=getMyLine(gameState, self.red)[0]
+                    path= self.aStarSearch(gameState, gameState.getAgentState(self.index).getPosition(), [bottom], self.notGo2(gameState))
+                    if path is not None and len(path)>0:
+                        return path[0]
+
         ls = []
         if len(self.getDots(gameState)) > 15:
             dic = dict()
@@ -274,6 +303,7 @@ class Agent(CaptureAgent):
             dic3.update({i: len(self.aStarSearch(gameState, gameState.getAgentState(self.index).getPosition(), [i], self.notGo2(gameState)))})
         
         if len(dic3) == 0:
+            self.seduction=True
             if self.index<self.anotherIndex(gameState):
                 top=getMyLine(gameState, self.red)[len(getMyLine(gameState, self.red))-1]
                 path= self.aStarSearch(gameState, gameState.getAgentState(self.index).getPosition(), [top], self.notGo2(gameState))
@@ -664,7 +694,7 @@ class Agent(CaptureAgent):
         if a is not None:
             return self.aStarSearch(gameState, gameState.getAgentState(self.index).getPosition(), [a], self.notGo2(gameState))[0]
         if gameState.getAgentState(self.index).numCarrying ==0:
-            return self.eatDots2(gameState)
+            return self.eatDotsTest(gameState)
         else:
             if len(way) == 0:
                 return self.luckyWay(gameState)
@@ -899,16 +929,24 @@ class Agent(CaptureAgent):
         '''
         dp = self.notGo2(gameState)
         p = gameState.getAgentState(self.index).getPosition()
+        anop = gameState.getAgentState(self.anotherIndex(gameState)).getPosition()
         line = getMyLine(gameState, self.red)
         way = None
         a = 9999999
+        dp1=dp+[anop]
         for i in line:
-            path = self.aStarSearch(gameState, p, [i], dp)
+            path = self.aStarSearch(gameState, p, [i], dp1)
             if path is not None and len(path) < a:
                 a = len(path)
                 way = path
         if way is None:
-            return []
+            for i in line:
+                path = self.aStarSearch(gameState, p, [i], dp)
+                if path is not None and len(path) < a:
+                    a = len(path)
+                    way = path
+            if way is None:
+                return []
         return way
 
     def homeWay2(self, gameState, position):
