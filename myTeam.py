@@ -929,16 +929,24 @@ class Agent(CaptureAgent):
         '''
         dp = self.notGo2(gameState)
         p = gameState.getAgentState(self.index).getPosition()
+        anop = gameState.getAgentState(self.anotherIndex(gameState)).getPosition()
         line = getMyLine(gameState, self.red)
         way = None
         a = 9999999
+        dp1=dp+[anop]
         for i in line:
-            path = self.aStarSearch(gameState, p, [i], dp)
+            path = self.aStarSearch(gameState, p, [i], dp1)
             if path is not None and len(path) < a:
                 a = len(path)
                 way = path
         if way is None:
-            return []
+            for i in line:
+                path = self.aStarSearch(gameState, p, [i], dp)
+                if path is not None and len(path) < a:
+                    a = len(path)
+                    way = path
+            if way is None:
+                return []
         return way
 
     def homeWay2(self, gameState, position):
