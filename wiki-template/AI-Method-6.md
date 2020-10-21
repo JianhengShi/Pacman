@@ -14,7 +14,7 @@ This method is an implementation of the future improvements proposed in the Appr
 ## Hybrid Approach: Approximate Q-Learning & Classical Planning 
 
 ### Motivation  
-The motivation for this hybrid approach is to increase the efficiency of the agents when the agents fail to learn the optimal policy or the training for learning such an optimal policy takes too much time. For example, one of the major problems that the approximate q-learning agents had was that the agents would not carry the eaten food back home to score even after eating all the food. This was because the rewards for successful scoring were very sparse, and it would take a lot of time to train the agents. On the other hand, in situations like this where we knew what the optimal actions agents should take, classical planning is very efficient and effective.
+The motivation for this hybrid approach is to increase the efficiency of the agents when they fail to derive optimal policy from learning. There are many reasons for such failures, such as unrepresentative state features, sparse reward, or lack of training. When such failure occurs, the effectiveness and efficiency of the agents suffer dramatically. For example, one of the major problems that the approximate q-learning agents had was that the agents failed to learn the eaten food needed to be carried back home for scoring, which directly impacted the performance of the agents. Therefore, in situations like this, the agents need an alternative method to choose actions and this is when classical planning comes into play.
 
 [Back to top](#table-of-contents)
 
@@ -32,7 +32,8 @@ Second, instead of having the same agent play both defense and offense roles, we
 
 ### Trade-offs  
 #### *Advantages*  
-
+This approach has effectively improved the performance of the agents. The classical planning techniques complemented the approximate Q-learning by providing a relatively efficient action plan in certain situations where agents failed to derive optimal policies from learning. 
+Moreover, by having one agent play one role only, the problem domain for each agent was simplified and the interpretability of the agent behaviors was improved. 
 
 #### *Disadvantages*
 
