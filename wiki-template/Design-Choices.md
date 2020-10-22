@@ -26,7 +26,7 @@ In order to execute Heuristic Search Algorithms, we have completed two versions 
 
 [Back to top](#table-of-contents)
 ### Agent Choice
-The results of the game showed that the A* algorithm achieved an overwhelming victory. Therefore, we finally decided to use this version of the agent as the initial choice.
+The results of the game showed that the A* algorithm achieved an overwhelming victory. Therefore, we finally decided to use this version as the initial choice.
 
 [Back to top](#table-of-contents)
 ### Analysis and Discussion
