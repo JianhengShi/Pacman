@@ -1,9 +1,9 @@
-# AI Method 4 - Monte Carlo Trees Search
+# AI Method 4 - Approximate Q-Learning Approach
 
-We also tried Upper Confidence Trees (MonteCarlo Tree Search with Upper Confidence Bounds) as our Pacman AI planning algorithm. 
+The goal of this approach was to make the Pacman agents learn policies through experience and win the game automatically by applying the learnt policies. To achieve the goal, we deployed a model-free reinforcement learning technique: approximate q-learning. A range of features were selected to describe the environment and a set of rewards were specified to encourage the right choices of actions. However, due to the inherent complexity of the problem, the features and reward used could not fully capture the states and the outcome of our initial attempt of using approximate q-learning alone was poor. Therefore, to improve the performance, we proposed a hybrid approach by combining approximate q-learning with classical planning.
 
 # Table of Contents
-- [Monte Carlo Trees Search](#Upper-Confidence-Trees)
+- [Approximate Q-learning](#Approximate-Q-Learning)
   * [Motivation](#motivation)
   * [Application](#application)
   * [Trade-offs](#trade-offs)     
@@ -11,52 +11,46 @@ We also tried Upper Confidence Trees (MonteCarlo Tree Search with Upper Confiden
      - [Disadvantages](#disadvantages)
   * [Future improvements](#future-improvements)
 
-## Monte Carlo Trees Search
-### Motivation 
+## Approximate Q-learning  
 
-As mentioned, Pacman game is a dynamic game with mutiple specific situations. Online planning such as MonteCarlo Tree Search sounds better for this kind of games compared with offline planning. At the same time, we know that MonteCarlo Tree Search already proved to has a satisfactory performance in a lot of Atari games. Therefore, we think MCTS should also perform well in pacman games. Also, with Upper Confidence Bounds or Epsilon greedy method, we can change exploration or exploitation of MCTS easily. Pacman is not a non-deterministic problem, every action has a deterministic outcome, which helps us simplify the MCTS algorithm.
+### Motivation  
+There are three important properties of the Pacman problem domain:
+1. The Pacman game is an MDP problem where an action can lead to more than one possible outcomes. For example, The action "stop" can lead to either the Pacman staying at the same position or being eaten by the opponents. 
+2. The probabilities of the outcomes of an action are unknown. This is because the Pacman problem is a two-player game and the outcome of an action depends on the action of the other player who we do not have control of.
+3. Due to the layout of the maps and moves of opponents are  unpredictable, the Pacman problem domain is very dynamic and has a potentially infinite number of states. It is impossible and unnecessary for our agents to visit every possible state during training. 
+
+Considering these properties, we decided to try approximate q-learning as it is known for being a model-free solution for MDPs. Additionally, the use of features for state representations allows us to estimate the Q values of unseen states and eliminates the need for keeping a large Q-table.
 
 [Back to top](#table-of-contents)
 
 ### Application  
+Our implementation of approximate Q-learning can be found in [commit b94fb39](https://github.com/COMP90054-classroom/contest-a-team/commit/b94fb391c167ea6df73f8bd0af930c1f29910c3d).
 
-Because of time consumption of simulations, we are not running MCTS all the time. Insteadly, we are just using it when pacman is catching by enemy's ghosts. Because we already know, when there is no enemy's ghosts or our agent is going back home, classical planning like A* is already performed very well. 
-
-![When to run MCTS](images/MCTS_decision_tree.png)
-
-When implementing MCTS algorithm, first we need to choose when to terminate. Because the calculation time of each step is very limited, it is hard to calculate the convergent tree within the pre-defined time limit, therefore, we choose to use up the simulation time (0.5 seconds per agent) as the terminal of MCTS.
-
-Then, we define node class, each node contains a gamestate, q value, visit times and other tree data structure things. MCTS has 4 stages: Selection, Expansion, Simulation and Backpropagation. We implement these stages in main function of MCTS.
-```python
-    def MCTS(node):
-    timeLimit = 0.5
-    start = time.time()
-    while(time.time()-start < timeLimit):
-        # Selection and expansion
-        n = getExpandedNode(node) 
-        # Simulation and calculate rewards
-        reward = getReward(n)
-        # Backpropagation
-        backpropagation(n,reward)
-    return getBestChild(node).action
-```
-
-In selection stage, we simply use epsilon greedy method and assign epsilon with 0.1.
-
-In fact, what determines the performance of MCTS algorithm is the calculation process of the reward. Given number of features needs to be considered, we use features*weights again to calculate the reward. Generally speaking, when running away, we want our agent to eat capsule/avoid eaten by ghost/stay away from ghost, at the same time, taking into account the efficiency of eating dots. Therefore, we assing 'avoid eaten' and 'eat capsule' feature with major weight, 'stay away from ghost' with middle weight, 'get closer to food' and 'eat food' with minor weight.
+The intuition behind this implementation is to encourage the agents to play offense and to eat as many beans as possible when they are on the opponent’s side of the map and to play defense and eat opponent Pacman when they are on their home side. 
+Six features were used to represent the states in the game:
+*	Features "distanceToFood" and "foodToEat" describe the distance from the position of the agent Pacman to the closest food and if the agent ate food.
+*	Feature “disNotGo” describes the minimum distance between the agent Pacman and some predefined dangerous places on the map such as areas around the ghosts or dead-end alley.
+*	Feature “disPac” describes the distance between the agent Ghost and the closest observable opponent Pacman.
+*	Feature “disCap” describes the distance between the agent Pacman and the closest capsules on the map.
+*	Feature “toScore” describes how far the agent Pacman is from the home and how much food it carries.
+Since there were five actions in the problem domain and six state features per action, we ended up with a feature vector with 25 features in total. 
+Positive rewards were given when the agent Pacman ate food or capsule, or the agent Ghost ate the opponent Pacman. Negative rewards were given when the agent Pacman was at the predefined dangerous places or got eaten by the opponent Ghost.
 
 [Back to top](#table-of-contents)
 
 ### Trade-offs  
 #### *Advantages*  
-Through experiment, we get a result above staff team top. Facts have proved that this online planning method is quite effective for solving dynamic planning problems.
+As discussed in the motivation section, there are three main advantages of using Q-learning. First, Q-learning is model free. We do not need to know the probabilities of action outcomes. Second, it does not require the agent to visit every state and store the Q-value for each state and action pair during the training. This is particularly important for a large state space such as the Pacman problem we are trying to solve here. Lastly, it allows us to generalize our solution to unseen state and action pairs through approximation. 
 
 #### *Disadvantages*
-MCTS requires a lot of computing power. When the limited computing time is too short, the simulation will not be well performed. 
+Like other reinforcement learning approaches, Q-learning suffers from poor interpretability, which makes debugging and quality assurance much harder. When we observed unexpected behaviors of the agents, it was difficult to reason the causes or come up with improvements, especially when there were many features. 
+Moreover, due to the inherent complexity of the Pacman problem, we found some policies take a longer time to learn due to the lack of representative features and sparse reward. For example, in this implementation, the agent Pacman failed to learn when to deliver the eaten food home for scoring with the amount of training we conducted. 
 
 [Back to top](#table-of-contents)
 
-### Future improvements  
-Due to the limited project time, we only tried to use MCTS in a special case. We may try to use this method globally in the future to expect more concise and unified idea and better performance.
+### Future Improvements  
+Based on the problems we found during the implementation, we propose two improvements:
+1.	Make one agent play offense, while the other agent plays defense. This way, we can simplify the state space for each agent, and hopefully it will give us better interpretability of the agent behaviors. 
+2.	For policies that are hard to learn due to the lack of effective features and sparce rewards, we can use classical planning approaches to tell the agent directly what to do. For example, for the scoring problem mentioned above, we can specify a threshold for food carried. Once the threshold is met, the agent will use a heuristic search to deliver the food home and score before switching back to using the learnt policies.
 
 [Back to top](#table-of-contents)

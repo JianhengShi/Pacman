@@ -1,9 +1,9 @@
-# AI Method 3 - Heuristic Search Algorithms: Hill Climbing
+# AI Method 3 - Monte Carlo Trees Search
 
-We tried the Hill Climbing method to find action for the agent. As a local heuristic search method, Hill Climbing is a very intuitive and simple method, since we used it to imporve the baseline performance, as to compared with other advanced methods. Different from other method, it only considers of possible actions in the next one step, and ignored all other useless information on the layout. Therefore, it takes up very little memory and runs extremely fast. Nevertheless, its performance is very limited. Because of its short-sightedness, we can’t plan for the situation a few steps later.
+We also tried Upper Confidence Trees (MonteCarlo Tree Search with Upper Confidence Bounds) as our Pacman AI planning algorithm. 
 
 # Table of Contents
-- [Heuristic Search Algorithms: Hill Climbing](#Heuristic-Search-Algorithms-Hill-Climbing)
+- [Monte Carlo Trees Search](#Upper-Confidence-Trees)
   * [Motivation](#motivation)
   * [Application](#application)
   * [Trade-offs](#trade-offs)     
@@ -11,39 +11,52 @@ We tried the Hill Climbing method to find action for the agent. As a local heuri
      - [Disadvantages](#disadvantages)
   * [Future improvements](#future-improvements)
 
-## Heuristic Search Algorithms: Hill Climbing  
+## Monte Carlo Trees Search
+### Motivation 
 
-### Motivation  
-When we observe the default baseline method, we find that it works with a method similar to hill climbing. Its heuristic function is the Qvalue of each node. This Qvalue is obtained by features and weights. However, its selection of features is very limited. For example, Pacman only considered eating food and didn't consider avoiding ghost. Therefore, we intuitively think that when adding some map preprocessing steps and features, its performance can be improved.
+As mentioned, Pacman game is a dynamic game with mutiple specific situations. Online planning such as MonteCarlo Tree Search sounds better for this kind of games compared with offline planning. At the same time, we know that MonteCarlo Tree Search already proved to has a satisfactory performance in a lot of Atari games. Therefore, we think MCTS should also perform well in pacman games. Also, with Upper Confidence Bounds or Epsilon greedy method, we can change exploration or exploitation of MCTS easily. Pacman is not a non-deterministic problem, every action has a deterministic outcome, which helps us simplify the MCTS algorithm.
 
 [Back to top](#table-of-contents)
 
 ### Application  
 
-We use h = -Qvalue = - features * weightsT as our heuristic function.
+Because of time consumption of simulations, we are not running MCTS all the time. Insteadly, we are just using it when pacman is catching by enemy's ghosts. Because we already know, when there is no enemy's ghosts or our agent is going back home, classical planning like A* is already performed very well. 
 
-We only modified the offensive agent. The added features are: avoid getting too close to the visible ghost, avoid entering a dead end, and choose to go home when the agent is carrying too much food.
+![When to run MCTS](images/MCTS_decision_tree.png)
 
-1. add feature of maze distance to visible ghost, assign weight of it with 5.
-2. add feature of agent location in dead end or in stop status, assign weight of it with -10.
-3. add feature of maze distance to home side, assign weight of -1. When going back, all other feature are 0.
+When implementing MCTS algorithm, first we need to choose when to terminate. Because the calculation time of each step is very limited, it is hard to calculate the convergent tree within the pre-defined time limit, therefore, we choose to use up the simulation time (0.5 seconds per agent) as the terminal of MCTS.
 
-Then, hill climbing will choose action which minimize heuristic h.
+Then, we define node class, each node contains a gamestate, q value, visit times and other tree data structure things. MCTS has 4 stages: Selection, Expansion, Simulation and Backpropagation. We implement these stages in main function of MCTS.
+```python
+    def MCTS(node):
+    timeLimit = 0.5
+    start = time.time()
+    while(time.time()-start < timeLimit):
+        # Selection and expansion
+        n = getExpandedNode(node) 
+        # Simulation and calculate rewards
+        reward = getReward(n)
+        # Backpropagation
+        backpropagation(n,reward)
+    return getBestChild(node).action
+```
+
+In selection stage, we simply use epsilon greedy method and assign epsilon with 0.1.
+
+In fact, what determines the performance of MCTS algorithm is the calculation process of the reward. Given number of features needs to be considered, we use features*weights again to calculate the reward. Generally speaking, when running away, we want our agent to eat capsule/avoid eaten by ghost/stay away from ghost, at the same time, taking into account the efficiency of eating dots. Therefore, we assing 'avoid eaten' and 'eat capsule' feature with major weight, 'stay away from ghost' with middle weight, 'get closer to food' and 'eat food' with minor weight.
 
 [Back to top](#table-of-contents)
 
 ### Trade-offs  
 #### *Advantages*  
-As a local heuristic search method, Hill Climbing is easy to implement and has a fast compuation speed. What's more, compared to A* and Qlearning and MCTS, it is the most memory saving method.
-
+Through experiment, we get a result above staff team top. Facts have proved that this online planning method is quite effective for solving dynamic planning problems.
 
 #### *Disadvantages*
-Performance of Hill Climbing is limited. Thus, we just use it as a baseline improvement method.
+MCTS requires a lot of computing power. When the limited computing time is too short, the simulation will not be well performed. 
 
 [Back to top](#table-of-contents)
 
 ### Future improvements  
-
-Pacman games are dynamic with many different status and situations. Therefore, different heuristic calculation methods can be used according to different situations. When choosing an action, first, set of features and their corresponding weights should be choosed by decision logic and game status, then calculate heuristics. This may improve the performance of this Hill Climbing method.
+Due to the limited project time, we only tried to use MCTS in a special case. We may try to use this method globally in the future to expect more concise and unified idea and better performance.
 
 [Back to top](#table-of-contents)
