@@ -1,5 +1,5 @@
 # Design Choices
-This section compares the different approaches we have implemented, justifies and explains the performance of them, and shows how our final choice was made.
+This section compares the different approaches we have implemented, justifies and explains the performance of them, and demonstrates how our final choice was made.
 # Table of Contents
 - [Choice 1 &nbsp;&nbsp; A* or Hill Climbing](#Choice-1-A*-or-Hill-Climbing)
   * [Performance Comparison](#Performance-Comparison)
