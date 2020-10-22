@@ -20,7 +20,7 @@ When we observe the default baseline method, we find that it works with a method
 
 ### Application  
 
-$$h = -Q-value = - features*weightsT$$
+$h = -Q-value = - features*weightsT$
 
 We only modified the offensive agent. The added features are: avoid getting too close to the visible ghost, avoid entering a dead end, and choose to go home when the agnet is carrying too much food.
 
