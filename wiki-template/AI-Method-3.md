@@ -3,7 +3,7 @@
 We tried the Hill Climbing method to find action for the agent. As a local heuristic search method, Hill Climbing is a very intuitive and simple method, since we used it to imporve the baseline performance, as to compared with other advanced methods. Different from other method, it only considers of possible actions in the next one step, and ignored all other useless information on the layout. Therefore, it takes up very little memory and runs extremely fast. Nevertheless, its performance is very limited. Because of its short-sightedness, we can’t plan for the situation a few steps later.
 
 # Table of Contents
-- [Heuristic Search Algorithms: Hill Climbing](#Heuristic Search Algorithms-Hill-Climbing)
+- [Heuristic Search Algorithms: Hill Climbing](#Heuristic-Search-Algorithms-Hill-Climbing)
   * [Motivation](#motivation)
   * [Application](#application)
   * [Trade-offs](#trade-offs)     
@@ -20,7 +20,7 @@ When we observe the default baseline method, we find that it works with a method
 
 ### Application  
 
-h = -Qvalue = - features*weightsT
+$$h = -Q-value = - features*weightsT$$
 
 We only modified the offensive agent. The added features are: avoid getting too close to the visible ghost, avoid entering a dead end, and choose to go home when the agnet is carrying too much food.
 
