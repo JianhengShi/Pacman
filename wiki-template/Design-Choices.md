@@ -44,12 +44,11 @@ In fact, even though the A* version completely beats the Hill Climbing version, 
 
 ## General Comments
 
-We compared several AI planning algorithms or hybrid algorithms with their performance in Pacman game. For seeing implemetation of these methods, please go to seperate wiki file of each method. 
+The following table lists the pros and cons of the different AI planning algorithms or hybrid algorithms we implemented. To see the detailed implemetation of each method, please go to the corresponding seperate wiki file. 
 
 ![Comparison of Methods](images/Methods_comparison.png)
 
-In the end, we chose the first method with the best performance.
-
+According to their performance in the Test Contest, we chose the first method as our final agent.
 
 ## Comments per topic
 
