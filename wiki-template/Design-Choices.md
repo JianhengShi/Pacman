@@ -81,7 +81,13 @@ This is our tentative verification of Q Learning methods. It is a model-free rei
 Performance in the contest: Above staff team basic
 
 
+* Hybrid Q Learning:
 
+This is is an implementation of the future improvements proposed in the above Approximate Q-Learning Approach. For details, see [AI-Method-6](https://github.com/COMP90054-classroom/contest-a-team/blob/master/wiki-template/AI-Method-6.md). By combining the reinforcement learning approach with classical planning techniques, we effectively improved the performance of our agents. Through this method, we explored more possibilities of Q learning. But since it did not beat A* algorithm agent in the contest, we did not use it in the final contest.
+
+Performance in the contest: Above staff team medium
+
+![Method 6](images/Q_learning.png)
 
 
 ## Offense
