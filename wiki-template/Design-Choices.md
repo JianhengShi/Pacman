@@ -31,6 +31,13 @@ We came out with this method because we knew from the lectures that Monte Carlo 
 Performance in the contest: Above staff team top
 ![Method 4](images/MCTS.png)
 
+* Approximate Q Learning:
+
+This is our tentative verification of Q Learning methods. It is a model-free reinforcement learning technique to make the Pacman agents learn policies through experience and win the game automatically by applying the learnt policies. For details, see [AI-Method-5](https://github.com/COMP90054-classroom/contest-a-team/blob/master/wiki-template/AI-Method-5.md). However, due to the inherent complexity of the problem, the features and reward used could not fully capture the states and the outcome of our initial attempt of using approximate q-learning alone was poor. Therefore, to improve the performance, we proposed a hybrid approach by combining approximate q-learning with classical planning which is the following method.
+
+Performance in the contest: Above staff team basic
+
+
 
 
 
