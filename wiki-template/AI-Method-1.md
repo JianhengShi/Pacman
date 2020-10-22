@@ -12,7 +12,7 @@ When searching for successors, each candidate node will be judged whether it bel
 Additionally, our A* algorithm uses maze distance as the heuristic method.
 
 # Table of Contents
-- [Heuristic Search Algorithms: A*](#heuristic-search-algorithms:-A*)
+- [Heuristic Search Algorithms: A*](#heuristic-search-algorithms-A*)
   * [Motivation](#motivation)
   * [Application](#application)
   * [Trade-offs](#trade-offs)     
