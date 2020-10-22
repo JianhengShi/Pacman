@@ -76,7 +76,6 @@ class Agent(CaptureAgent):
         '''
        
         # If teh agent is stuck
-        
         if self.ifCatch(gameState):
             # print(1)
             output = self.catch(gameState)
@@ -260,16 +259,17 @@ class Agent(CaptureAgent):
         if self.seduction==True:
             g_list=self.enemyGIndex(gameState)
             if g_list==None or len(g_list)==0:
-                    self.seduction==False
+                    self.seduction=False
             safe=True
             for i in self.enemyGIndex(gameState):
                 if self.getMazeDistance(gameState.getAgentState(self.index).getPosition(), gameState.getAgentState(i).getPosition())<=4:
                     safe=False
             if safe==True:
-                self.seduction==False
-
+                self.seduction=False
+            
             if gameState.getAgentState(self.anotherIndex(gameState)).getPosition()[1]<=gameState.data.layout.height/2:
                 if gameState.getAgentState(self.index).getPosition()==getMyLine(gameState, self.red)[len(getMyLine(gameState, self.red))-1]:
+                    
                     self.seduction=False
                 else:
                     top=getMyLine(gameState, self.red)[len(getMyLine(gameState, self.red))-1]
@@ -304,6 +304,7 @@ class Agent(CaptureAgent):
         
         if len(dic3) == 0:
             self.seduction=True
+            
             if gameState.getAgentState(self.anotherIndex(gameState)).getPosition()[1]<=gameState.data.layout.height/2:
                 top=getMyLine(gameState, self.red)[len(getMyLine(gameState, self.red))-1]
                 path= self.aStarSearch(gameState, gameState.getAgentState(self.index).getPosition(), [top], self.notGo2(gameState))
@@ -383,6 +384,7 @@ class Agent(CaptureAgent):
                     
                     return self.catch(gameState)
             '''
+        
         return self.aStarSearch(gameState, gameState.getAgentState(self.index).getPosition(), [out], self.notGo2(gameState))[0]
 
     def eatDotsTest2(self, gameState):
@@ -397,14 +399,14 @@ class Agent(CaptureAgent):
         if self.seduction==True:
             g_list=self.enemyGIndex(gameState)
             if g_list==None or len(g_list)==0:
-                    self.seduction==False
+                    self.seduction=False
             safe=True
             for i in self.enemyGIndex(gameState):
                 if self.getMazeDistance(gameState.getAgentState(self.index).getPosition(), gameState.getAgentState(i).getPosition())<=4:
                     safe=False
             if safe==True:
-                self.seduction==False
-
+                self.seduction=False
+            
             if gameState.getAgentState(self.anotherIndex(gameState)).getPosition()[1]<=gameState.data.layout.height/2:
                 if gameState.getAgentState(self.index).getPosition()==getMyLine(gameState, self.red)[len(getMyLine(gameState, self.red))-1]:
                     self.seduction=False
