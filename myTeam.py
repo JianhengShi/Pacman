@@ -268,7 +268,7 @@ class Agent(CaptureAgent):
             if safe==True:
                 self.seduction==False
 
-            if self.index<self.anotherIndex(gameState):
+            if gameState.getAgentState(self.anotherIndex(gameState)).getPosition()[1]<=gameState.data.layout.height/2:
                 if gameState.getAgentState(self.index).getPosition()==getMyLine(gameState, self.red)[len(getMyLine(gameState, self.red))-1]:
                     self.seduction=False
                 else:
@@ -276,7 +276,7 @@ class Agent(CaptureAgent):
                     path= self.aStarSearch(gameState, gameState.getAgentState(self.index).getPosition(), [top], self.notGo2(gameState))
                     if path is not None and len(path)>0:
                         return path[0]
-            if self.index>self.anotherIndex(gameState):
+            if gameState.getAgentState(self.anotherIndex(gameState)).getPosition()[1]>gameState.data.layout.height/2:
                 if gameState.getAgentState(self.index).getPosition()==getMyLine(gameState, self.red)[0]:
                     self.seduction=False
                 else:
@@ -304,7 +304,7 @@ class Agent(CaptureAgent):
         
         if len(dic3) == 0:
             self.seduction=True
-            if self.index<self.anotherIndex(gameState):
+            if gameState.getAgentState(self.anotherIndex(gameState)).getPosition()[1]<=gameState.data.layout.height/2:
                 top=getMyLine(gameState, self.red)[len(getMyLine(gameState, self.red))-1]
                 path= self.aStarSearch(gameState, gameState.getAgentState(self.index).getPosition(), [top], self.notGo2(gameState))
                 if path is not None and len(path)>0:
@@ -405,7 +405,7 @@ class Agent(CaptureAgent):
             if safe==True:
                 self.seduction==False
 
-            if self.index<self.anotherIndex(gameState):
+            if gameState.getAgentState(self.anotherIndex(gameState)).getPosition()[1]<=gameState.data.layout.height/2:
                 if gameState.getAgentState(self.index).getPosition()==getMyLine(gameState, self.red)[len(getMyLine(gameState, self.red))-1]:
                     self.seduction=False
                 else:
@@ -413,7 +413,7 @@ class Agent(CaptureAgent):
                     path= self.aStarSearch(gameState, gameState.getAgentState(self.index).getPosition(), [top], self.notGo2(gameState))
                     if path is not None and len(path)>0:
                         return path[0]
-            if self.index>self.anotherIndex(gameState):
+            if gameState.getAgentState(self.anotherIndex(gameState)).getPosition()[1]>gameState.data.layout.height/2:
                 if gameState.getAgentState(self.index).getPosition()==getMyLine(gameState, self.red)[0]:
                     self.seduction=False
                 else:
@@ -441,7 +441,7 @@ class Agent(CaptureAgent):
         
         if len(dic3) == 0:
             self.seduction=True
-            if self.index<self.anotherIndex(gameState):
+            if gameState.getAgentState(self.anotherIndex(gameState)).getPosition()[1]<=gameState.data.layout.height/2:
                 top=getMyLine(gameState, self.red)[len(getMyLine(gameState, self.red))-1]
                 path= self.aStarSearch(gameState, gameState.getAgentState(self.index).getPosition(), [top], self.notGo2(gameState))
                 if path is not None and len(path)>0:
