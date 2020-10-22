@@ -67,32 +67,32 @@ Performance in the contest: Around staff team super
 
 * Hill Climbing:
 
-This is simple idea we first came out with intuitive think of improving the default baseline method. For details, see [AI-Method-3](https://github.com/COMP90054-classroom/contest-a-team/blob/master/wiki-template/AI-Method-3.md). Its implementation is simple and straightforward, but its performance is fairly limited. Maybe we can improve its performance by implementing more presice decision logic for different cases. However, We did not focus on this method because it was easily defeated by our other methods.
+This is simple idea we first came out with intuitive think of improving the default baseline method. For details, see [AI-Method-2](https://github.com/COMP90054-classroom/contest-a-team/blob/master/wiki-template/AI-Method-2.md). Its implementation is simple and straightforward, but its performance is fairly limited. Maybe we can improve its performance by implementing more presice decision logic for different cases. However, We did not focus on this method because it was easily defeated by our other methods.
 
 Performance in the contest: Around staff team basic
 
 * Monte Carlo Tree Search:
 
-We came out with this method because we knew from the lectures that Monte Carlo Tree Search is very suitable for real-time AI planning for dynamic games like Pacman. For details, see [AI-Method-4](https://github.com/COMP90054-classroom/contest-a-team/blob/master/wiki-template/AI-Method-4.md). We added MCTS to the main method as an attempt. It turns out that it can help simplify the complicated logic of using only A* searching. However, it is not significantly improved in performace compared with the main method, so we did not choose it finally.
+We came out with this method because we knew from the lectures that Monte Carlo Tree Search is very suitable for real-time AI planning for dynamic games like Pacman. For details, see [AI-Method-3](https://github.com/COMP90054-classroom/contest-a-team/blob/master/wiki-template/AI-Method-3.md). We added MCTS to the main method as an attempt. It turns out that it can help simplify the complicated logic of using only A* searching. However, it is not significantly improved in performace compared with the main method, so we did not choose it finally.
 
 Performance in the contest: Above staff team top
 
-![Method 4](images/MCTS.png)
+![Method 3](images/MCTS.png)
 
 * Approximate Q Learning:
 
-This is our tentative verification of Q Learning methods. It is a model-free reinforcement learning technique to make the Pacman agents learn policies through experience and win the game automatically by applying the learnt policies. For details, see [AI-Method-5](https://github.com/COMP90054-classroom/contest-a-team/blob/master/wiki-template/AI-Method-5.md). However, due to the inherent complexity of the problem, the features and reward used could not fully capture the states and the outcome of our initial attempt of using approximate q-learning alone was poor. Therefore, to improve the performance, we proposed a hybrid approach by combining approximate q-learning with classical planning which is the following method.
+This is our tentative verification of Q Learning methods. It is a model-free reinforcement learning technique to make the Pacman agents learn policies through experience and win the game automatically by applying the learnt policies. For details, see [AI-Method-4](https://github.com/COMP90054-classroom/contest-a-team/blob/master/wiki-template/AI-Method-4.md). However, due to the inherent complexity of the problem, the features and reward used could not fully capture the states and the outcome of our initial attempt of using approximate q-learning alone was poor. Therefore, to improve the performance, we proposed a hybrid approach by combining approximate q-learning with classical planning which is the following method.
 
 Performance in the contest: Above staff team basic
 
 
 * Hybrid Q Learning:
 
-This is is an implementation of the future improvements proposed in the above Approximate Q-Learning Approach. For details, see [AI-Method-6](https://github.com/COMP90054-classroom/contest-a-team/blob/master/wiki-template/AI-Method-6.md). By combining the reinforcement learning approach with classical planning techniques, we effectively improved the performance of our agents. Through this method, we explored more possibilities of Q learning. But since it did not beat A* algorithm agent in the contest, we did not use it in the final contest.
+This is is an implementation of the future improvements proposed in the above Approximate Q-Learning Approach. For details, see [AI-Method-5](https://github.com/COMP90054-classroom/contest-a-team/blob/master/wiki-template/AI-Method-5.md). By combining the reinforcement learning approach with classical planning techniques, we effectively improved the performance of our agents. Through this method, we explored more possibilities of Q learning. But since it did not beat A* algorithm agent in the contest, we did not use it in the final contest.
 
 Performance in the contest: Above staff team medium
 
-![Method 6](images/Q_learning.png)
+![Method 5](images/Q_learning.png)
 
 
 ## Offense
