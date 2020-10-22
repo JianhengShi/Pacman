@@ -57,6 +57,7 @@ class Agent(CaptureAgent):
         '''
         CaptureAgent.registerInitialState(self, gameState)
         self.def_target = getMyLine(gameState, self.red)[int(len(getMyLine(gameState, self.red))/2)]
+        self.def_target1 = getMyLine(gameState, self.red)[int(len(getMyLine(gameState, self.red))/2)]
         self.state = gameState
         self.go_home = False
         self.my_dots = self.getMyDots(gameState)
@@ -64,7 +65,7 @@ class Agent(CaptureAgent):
         self.spl = getSpl(gameState, self.red)
         self.out = getOut(gameState, self.red)
         self.pos = [] #List of position history
-        self.stuckThreshold = 15
+        self.stuckThreshold = 9
         self.safeBreakTie = 2
         self.fortune=0
         self.seduction=False
@@ -219,11 +220,17 @@ class Agent(CaptureAgent):
                 if path is not None and len(path)>0:
                     return path[0]
             else:
+                stay=True
+                for i in self.getOpponents(gameState):
+                    if gameState.getAgentState(i).isPacman is True:
+                        stay=False
                 path = self.aStarSearch(gameState, gameState.getAgentState(self.index).getPosition(), [self.def_target], self.notGo2(gameState))
-                if path is not None and len(path)>0:
+                if path is not None and len(path)>0 and stay==False:
                     return path[0]
                 else:
-                    return Directions.STOP
+                    path = self.aStarSearch(gameState, gameState.getAgentState(self.index).getPosition(), [self.def_target1], self.notGo2(gameState))
+                    if path is not None and len(path)>0:
+                        return path[0]
                 c = None
                 d=9999999
                 for dot in self.getMyDots(gameState):
