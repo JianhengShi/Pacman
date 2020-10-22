@@ -89,12 +89,12 @@ Performance in the contest: Above staff team basic
 Through experiments, we find that aggressive strategy of eating dots is more effective, namely, both agents play the role of attackers at most of the time. Because when facing intelligent opponents, defense is very difficult and inefficient. As the saying goes: attack is the best defense. You can't win the Pacman game by defending.
 
 This is comparison between our less-denfence version and more-defence version:
-* Less-denfence version:
+* Less-denfense version:
 
-![Less-denfence version](images/10-19.png)
-* More-denfence version:
+![Less-denfense version](images/10-19.png)
+* More-denfense version:
 
-![More-denfence version](images/10-13.png)
+![More-denfense version](images/10-13.png)
 
 ## Defense
 For defense cases, the agent first find a path to enemy's Pacman. If there is no feasible path, then the agent will go to location of last dot eaten by enemy's Pacman.
