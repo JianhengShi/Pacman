@@ -58,6 +58,7 @@ In the end, we chose the first method with the best performance.
 This is the method we focus on with whole cycle of evolution. For details, see [AI-Method-1](https://github.com/COMP90054-classroom/contest-a-team/blob/master/wiki-template/AI-Method-1.md) and [Evolution](https://github.com/COMP90054-classroom/contest-a-team/blob/master/wiki-template/Evolution.md). It has a really high performance in the contest. Besides, its high interpretability helps us to optimize the strategy, including the tuning of parameters and the change of behavior. However, because Heuristic Search Algorithms is too simple and straightforward, our agent cannot learn in a large number of competitions, namely, it is not inherently intelligent. Thus, it took us a lot of time and energy to debug and improve this method.
 
 Performance in the contest: Around staff team super
+
 ![Method 1](images/10-19.png)
 
 * Hill Climbing:
@@ -71,6 +72,7 @@ Performance in the contest: Around staff team basic
 We came out with this method because we knew from the lectures that Monte Carlo Tree Search is very suitable for real-time AI planning for dynamic games like Pacman. For details, see [AI-Method-4](https://github.com/COMP90054-classroom/contest-a-team/blob/master/wiki-template/AI-Method-4.md). We added MCTS to the main method as an attempt. It turns out that it can help simplify the complicated logic of using only A* searching. However, it is not significantly improved in performace compared with the main method, so we did not choose it finally.
 
 Performance in the contest: Above staff team top
+
 ![Method 4](images/MCTS.png)
 
 * Approximate Q Learning:
@@ -89,8 +91,10 @@ Through experiments, we find that aggressive strategy of eating dots is more eff
 
 This is comparison between our less-denfence version and more-defence version:
 * Less-denfence version:
+
 ![Less-denfence version](images/10-19.png)
 * More-denfence version:
+
 ![More-denfence version](images/10-13.png)
 
 ## Defense
