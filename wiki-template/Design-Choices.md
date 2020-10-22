@@ -1,6 +1,6 @@
 # Design Choices
 
-## Choice 1       A Star or Hill Climbing
+## Choice 1       &nbsp&nbsp A Star or Hill Climbing
 
 ### Performance Comparison
 In order to execute Heuristic Search Algorithms, we have completed two versions of agents. One is based on the A Star algorithm, and the other is based on the Hill Climbing algorithm. Since the Test Contest did not start when these two versions were completed, we used the built-in layouts to conduct internal competitions against these two agents. The results are shown in the following table ((9/10) means 9 out of 10 games won):
