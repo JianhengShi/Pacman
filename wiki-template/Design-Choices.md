@@ -12,7 +12,7 @@ This section compares the different approaches we have implemented, justifies an
 In order to execute Heuristic Search Algorithms, we totally completed two versions of agents. One is based on the A* algorithm, and the other is based on the Hill Climbing algorithm. Since the Test Contest had not started when these two versions were completed, we used the built-in layouts to conduct internal competitions between these two agents. The results are shown in the following table ((9/10) means 9 out of 10 games won):
 
 |  Layouts   | Winner |
-|  :----  | :----  |
+|  ----  | ----  |
 | alleyCapture  | A*(9/10) |  
 | bloxCapture  | A*(8/10)| 
 |  crowdedCapture | A*(10/10) | 
