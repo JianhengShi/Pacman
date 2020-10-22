@@ -1,4 +1,4 @@
-# AI Method 1 - Heuristic Search Algorithms
+# AI Method 1 - Heuristic Search Algorithms: A*
 
 In Heuristic Search Algorithms, we use the A* method to find a path for the agent. Different from the classic method, since the Pacman game is dynamic, a list containing the dangerous area defined under different circumstances will be passed into this method to prevent Pacman from falling into danger. The specific code is as follows:
 ```python
@@ -12,7 +12,7 @@ When searching for successors, each candidate node will be judged whether it bel
 Additionally, our A* algorithm uses maze distance as the heuristic method.
 
 # Table of Contents
-- [Heuristic Search Algorithms](#heuristic-search-algorithms)
+- [Heuristic Search Algorithms: A*](#heuristic-search-algorithms:-A*)
   * [Motivation](#motivation)
   * [Application](#application)
   * [Trade-offs](#trade-offs)     
@@ -20,7 +20,7 @@ Additionally, our A* algorithm uses maze distance as the heuristic method.
      - [Disadvantages](#disadvantages)
   * [Future improvements](#future-improvements)
 
-## Heuristic Search Algorithms
+## Heuristic Search Algorithms: A*
 ### Motivation  
 Heuristic Search Algorithms has become our first choice for this project due to its simplicity and short computation time. Moreover, compared with Q-learning and MCST methods, the output of Heuristic Search Algorithms is easy to interpret, which provides us with a reference when debugging and adjusting competition strategies. Besides, Heuristic Search Algorithms does not need to be combined with specific action functions (such as offense and defense), and are independent of each other in execution, which reflects a high degree of abstraction, thereby improving the efficiency of project completion.
 
