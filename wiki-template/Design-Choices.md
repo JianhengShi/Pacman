@@ -11,8 +11,11 @@ In the end, we chose the first method with the best performance.
 
 ## Comments per topic
 
+* A* Search with Complete Decision Logic:
+This is the method we focus on with whole cycle of evolution. For details, see [AI-Method-1](https://github.com/COMP90054-classroom/contest-a-team/blob/master/wiki-template/AI-Method-1.md) and [Evolution](https://github.com/COMP90054-classroom/contest-a-team/blob/master/wiki-template/Evolution.md). It has a really high performance in the contest. Besides, its high interpretability helps us to optimize the strategy, including the tuning of parameters and the change of behavior. However, because Heuristic Search Algorithms is too simple and straightforward, our agent cannot learn in a large number of competitions, namely, it is not inherently intelligent. Thus, it took us a lot of time and energy to debug and improve this method.
 
-
+Performance in the contest: Around staff team super
+![Method 1](images/10-19.png)
 
 ## Offense
 
