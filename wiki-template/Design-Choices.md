@@ -45,6 +45,13 @@ In fact, even though the A* version completely beats the Hill Climbing version, 
 ## General Comments
 
 The following table lists the pros and cons of the different AI planning algorithms or hybrid algorithms we implemented. To see the detailed implemetation of each method, please go to the corresponding seperate wiki file. 
+| Method  | Performance  | Pros  |Cons|
+|---|---|---|---|
+| [A* Search + Complete Decision Logic](https://github.com/COMP90054-classroom/contest-a-team/blob/master/wiki-template/AI-Method-1.md)| Around staff team super  |  High performance, high interpretability, and fast calculation|Not intelligent or general enough, need to be implemented with complete logic with every specific case |
+| [Hill Climbing](https://github.com/COMP90054-classroom/contest-a-team/blob/master/wiki-template/AI-Method-2.md)  | Around staff team basic  | Simple and quick  |Low performance due to short-sightedness |
+| [A* Search + MCTS](https://github.com/COMP90054-classroom/contest-a-team/blob/master/wiki-template/AI-Method-3.md)  |  Above staff team top | Simplified logic, and more general with planning|Low calculation speed due to simulation |
+|  [Approximate Q-Learning](https://github.com/COMP90054-classroom/contest-a-team/blob/master/wiki-template/AI-Method-4.md) | Above staff team basic  | Model-free, and resource-saving compared to traditional Q-learning|Features and reward hard to assign,and poor interpretability during test|
+|  [A* Search + Q-learning](https://github.com/COMP90054-classroom/contest-a-team/blob/master/wiki-template/AI-Method-5.md) | Above staff team medium  | Improved performance of Approximate Q-Learning  | Switching between reinforcement learning and classical planning may lead to non-optimal actions|
 
 ![Comparison of Methods](images/Methods_comparison.png)
 
