@@ -53,8 +53,6 @@ The following table lists the pros and cons of the different AI planning algorit
 |  [Approximate Q-Learning](https://github.com/COMP90054-classroom/contest-a-team/blob/master/wiki-template/AI-Method-4.md) | Above staff team basic  | Model-free, and resource-saving compared to traditional Q-learning|Features and reward hard to assign,and poor interpretability during test|
 |  [A* Search + Q-learning](https://github.com/COMP90054-classroom/contest-a-team/blob/master/wiki-template/AI-Method-5.md) | Above staff team medium  | Improved performance of Approximate Q-Learning  | Switching between reinforcement learning and classical planning may lead to non-optimal actions|
 
-![Comparison of Methods](images/Methods_comparison.png)
-
 According to their performance in the Test Contest, we chose the first method as our final agent.
 
 ## Comments per topic
