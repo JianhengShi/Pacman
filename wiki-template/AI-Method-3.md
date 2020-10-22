@@ -1,9 +1,9 @@
-# AI Method 3 - Hill Climbing
+# AI Method 3 - Heuristic Search Algorithms: Hill Climbing
 
 We tried the Hill Climbing method to find action for the agent. As a local heuristic search method, Hill Climbing is a very intuitive and simple method, since we used it to imporve the baseline performance, as to compared with other advanced methods. Different from other method, it only considers of possible actions in the next one step, and ignored all other useless information on the layout. Therefore, it takes up very little memory and runs extremely fast. Nevertheless, its performance is very limited. Because of its short-sightedness, we can’t plan for the situation a few steps later.
 
 # Table of Contents
-- [Hill Climbing](#Hill-Climbing)
+- [Heuristic Search Algorithms: Hill Climbing](#Heuristic Search Algorithms-Hill-Climbing)
   * [Motivation](#motivation)
   * [Application](#application)
   * [Trade-offs](#trade-offs)     
@@ -11,7 +11,7 @@ We tried the Hill Climbing method to find action for the agent. As a local heuri
      - [Disadvantages](#disadvantages)
   * [Future improvements](#future-improvements)
 
-## Hill Climbing  
+## Heuristic Search Algorithms: Hill Climbing  
 
 ### Motivation  
 When we observe the default baseline method, we find that it works with a method similar to hill climbing. Its heuristic function is the Qvalue of each node. This Qvalue is obtained by features and weights. However, its selection of features is very limited. For example, Pacman only considered eating food and didn't consider avoiding ghost. Therefore, we intuitively think that when adding some map preprocessing steps and features, its performance can be improved.
