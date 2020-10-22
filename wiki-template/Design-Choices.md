@@ -1,5 +1,5 @@
 # Design Choices
-
+This section compares the different approaches we have implemented, justifies and explains the performance of them, and shows how our final agent was born.
 # Table of Contents
 - [Choice 1 &nbsp;&nbsp; A Star or Hill Climbing](#Choice-1-A-Star-or-Hill-Climbing)
   * [Performance Comparison](#Performance-Comparison)
