@@ -1,4 +1,4 @@
-# AI Method 4 - Monte Carlo Trees Search
+# AI Method 3 - Monte Carlo Trees Search
 
 We also tried Upper Confidence Trees (MonteCarlo Tree Search with Upper Confidence Bounds) as our Pacman AI planning algorithm. 
 
