@@ -18,6 +18,16 @@ This is the method we focus on with whole cycle of evolution. For details, see [
 Performance in the contest: Around staff team super
 ![Method 1](images/10-19.png)
 
+* Hill Climbing:
+
+This is simple idea we first came out with intuitive think of improving the default baseline method. For details, see [AI-Method-1](https://github.com/COMP90054-classroom/contest-a-team/blob/master/wiki-template/AI-Method-3.md). Its implementation is simple and straightforward, but its performance is fairly limited. Maybe we can improve its performance by implementing more presice decision logic for different cases. However, We did not focus on this method because it was easily defeated by our other methods.
+
+Performance in the contest: Around staff team basic
+
+* 
+
+
+
 ## Offense
 
 Through experiments, we find that aggressive strategy of eating dots is more effective, namely, both agents play the role of attackers at most of the time. Because when facing intelligent opponents, defense is very difficult and inefficient. As the saying goes: attack is the best defense. You can't win the Pacman game by defending.
