@@ -20,9 +20,9 @@ When we observe the default baseline method, we find that it works with a method
 
 ### Application  
 
-h = -Qvalue = - features * weightsT
+We use h = -Qvalue = - features * weightsT as our heuristic function.
 
-We only modified the offensive agent. The added features are: avoid getting too close to the visible ghost, avoid entering a dead end, and choose to go home when the agnet is carrying too much food.
+We only modified the offensive agent. The added features are: avoid getting too close to the visible ghost, avoid entering a dead end, and choose to go home when the agent is carrying too much food.
 
 1. add feature of maze distance to visible ghost, assign weight of it with 5.
 2. add feature of agent location in dead end or in stop status, assign weight of it with -10.
@@ -34,7 +34,7 @@ Then, hill climbing will choose action which minimize heuristic h.
 
 ### Trade-offs  
 #### *Advantages*  
-As a local heuristic search method, Hill Climbing is easy to implement and has a fast compuation speed. What's more, compare to A* and Qlearning and MCTS, it is the most memory saving method.
+As a local heuristic search method, Hill Climbing is easy to implement and has a fast compuation speed. What's more, compared to A* and Qlearning and MCTS, it is the most memory saving method.
 
 
 #### *Disadvantages*
