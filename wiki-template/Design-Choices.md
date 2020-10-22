@@ -1,5 +1,30 @@
 # Design Choices
 
+## Choice 1   A star or Hill Climbing
+
+### Performance Comparison
+In order to execute Heuristic Search Algorithms, we have completed two versions of agents. One is based on the A Star algorithm, and the other is based on the Hill Climbing algorithm. Since the Test Contest did not start when these two versions were completed, we used the built-in layouts to conduct internal competitions against these two agents. The results are shown in the following table ((9/10) means 9 out of 10 games won):
+
+|  Layouts   | Winner |
+|  :----  | :----  |
+| alleyCapture  | A Star(9/10) |  
+| bloxCapture  | A Star(8/10)| 
+|  crowdedCapture | A Star(10/10) | 
+|  defaultCapture | A Star(10/10) | 
+| distantCapture  | A Star(8/10) | 
+|  fastCapture |A Star(7/10)  | 
+| jumboCapture  |A Star(10/10)  | 
+|  mediumCapture |A Star(7/10)  | 
+| officeCapture  | A Star(10/10) | 
+| strategicCapture  | A Star(10/10) | 
+
+### Agent Choice
+The results of the game showed that the A Star algorithm achieved an overwhelming victory. Therefore, we finally decided to use this version of the agent as the initial choice.
+
+### Analysis and Discussion
+In fact, even though the A Star version completely beats the Hill Climbing version, this does not mean that the A Star algorithm is completely better than the Hill Climbing algorithm in the Pacman competition. By comparing the code logic, we found that the Hill Climbing version of the agent has many logical contradictions, and the judgment and decision-making of Pacman's behavior is not perfect, and the overall completion is far from the A Star version. However, since these two agents are based on cla, the final performance should not be much different. In view of the good logical judgment and better performance of the A Star version, we decided to further optimize and improve it.
+
+
 ## General Comments
 
 We compared several AI planning algorithms or hybrid algorithms with their performance in Pacman game. For seeing implemetation of these methods, please go to seperate wiki file of each method. 
