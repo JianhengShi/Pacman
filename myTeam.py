@@ -269,7 +269,7 @@ class Agent(CaptureAgent):
                     self.seduction=False
             safe=True
             for i in self.enemyGIndex(gameState):
-                if self.getMazeDistance(gameState.getAgentState(self.index).getPosition(), gameState.getAgentState(i).getPosition())<=4:
+                if self.getMazeDistance(gameState.getAgentState(self.index).getPosition(), gameState.getAgentState(i).getPosition())<=5:
                     safe=False
             if safe==True:
                 self.seduction=False
@@ -362,7 +362,14 @@ class Agent(CaptureAgent):
                     dic5.update({sorted(dic3.items(), key=operator.itemgetter(1))[i][0]:sorted(dic3.items(), key=operator.itemgetter(1))[i][1]})
 
             if len(dic5)!=0:
-                out = sorted(dic5.items(), key=operator.itemgetter(1))[0][0]
+                g_list=self.enemyGIndex(gameState)
+                if g_list==None or len(g_list)==0:
+                    out = sorted(dic5.items(), key=operator.itemgetter(1))[0][0]
+                    return self.aStarSearch(gameState, gameState.getAgentState(self.index).getPosition(), [out], self.notGo2(gameState))[0]
+                for i in self.enemyGIndex(gameState):
+                    if self.getMazeDistance(gameState.getAgentState(self.anotherIndex(gameState)).getPosition(), gameState.getAgentState(i).getPosition())<=4:
+                        out = sorted(dic3.items(), key=operator.itemgetter(1))[0][0]
+                        return self.aStarSearch(gameState, gameState.getAgentState(self.index).getPosition(), [out], self.notGo2(gameState))[0]
             else:
                 out = sorted(dic3.items(), key=operator.itemgetter(1))[0][0]
             # else:
@@ -409,7 +416,7 @@ class Agent(CaptureAgent):
                     self.seduction=False
             safe=True
             for i in self.enemyGIndex(gameState):
-                if self.getMazeDistance(gameState.getAgentState(self.index).getPosition(), gameState.getAgentState(i).getPosition())<=4:
+                if self.getMazeDistance(gameState.getAgentState(self.index).getPosition(), gameState.getAgentState(i).getPosition())<=5:
                     safe=False
             if safe==True:
                 self.seduction=False
