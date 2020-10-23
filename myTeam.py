@@ -219,6 +219,12 @@ class Agent(CaptureAgent):
                 path = self.aStarSearch(gameState, gameState.getAgentState(self.index).getPosition(), [eatenFood[0]], self.notGo2(gameState))
                 if path is not None and len(path)>0:
                     return path[0]
+                else:
+                    path = self.aStarSearch(gameState, gameState.getAgentState(self.index).getPosition(), [self.def_target1], self.notGo2(gameState))
+                    if path is not None and len(path)>0:
+                        return path[0]
+                    else:
+                        return Directions.STOP
             else:
                 stay=True
                 for i in self.getOpponents(gameState):
@@ -231,6 +237,8 @@ class Agent(CaptureAgent):
                     path = self.aStarSearch(gameState, gameState.getAgentState(self.index).getPosition(), [self.def_target1], self.notGo2(gameState))
                     if path is not None and len(path)>0:
                         return path[0]
+                    else:
+                        return Directions.STOP
                 c = None
                 d=9999999
                 for dot in self.getMyDots(gameState):
@@ -791,13 +799,13 @@ class Agent(CaptureAgent):
         for i in self.enemyGIndex2(self.state):
             for j in self.enemyGIndex2(gameState):
                 if i == j:
-                    # if self.ifAtDeadRoute(gameState):
+                    if self.ifAtDeadRoute(gameState):
                         
-                    #     if self.getMazeDistance(gameState.getAgentState(self.index).getPosition(), gameState.getAgentState(j).getPosition()) <= self.getMazeDistance(gameState.getAgentState(self.index).getPosition(), gameState.getAgentState(i).getPosition())<=5:
+                        if self.getMazeDistance(gameState.getAgentState(self.index).getPosition(), gameState.getAgentState(j).getPosition()) <= self.getMazeDistance(gameState.getAgentState(self.index).getPosition(), gameState.getAgentState(i).getPosition())<=6:
 
-                    #         return True
+                            return True
                             
-                    if self.getMazeDistance(gameState.getAgentState(self.index).getPosition(), gameState.getAgentState(j).getPosition()) <= self.getMazeDistance(gameState.getAgentState(self.index).getPosition(), gameState.getAgentState(i).getPosition()) <= 6:
+                    if self.getMazeDistance(gameState.getAgentState(self.index).getPosition(), gameState.getAgentState(j).getPosition()) <= self.getMazeDistance(gameState.getAgentState(self.index).getPosition(), gameState.getAgentState(i).getPosition()) <= 4:
                         return True
                     if self.getMazeDistance(gameState.getAgentState(self.anotherIndex(gameState)).getPosition(), gameState.getAgentState(j).getPosition()) <= self.getMazeDistance(gameState.getAgentState(self.anotherIndex(gameState)).getPosition(), gameState.getAgentState(i).getPosition()) <= 6:
                         for i in self.getCapsules(gameState):
