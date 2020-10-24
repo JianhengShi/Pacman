@@ -1124,7 +1124,7 @@ class Agent(CaptureAgent):
         Return a list of actions of shortest way to go back to our side to unload food.
         最近的回家的路
         '''
-        dp = self.notGo(gameState)
+        dp = self.notGo2(gameState)
         p = gameState.getAgentState(self.index).getPosition()
         line = getMyLine(gameState, self.red)
         way = None
