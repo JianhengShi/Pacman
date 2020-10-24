@@ -809,7 +809,7 @@ class Agent(CaptureAgent):
                         return True
                     if self.getMazeDistance(gameState.getAgentState(self.anotherIndex(gameState)).getPosition(), gameState.getAgentState(j).getPosition()) <= self.getMazeDistance(gameState.getAgentState(self.anotherIndex(gameState)).getPosition(), gameState.getAgentState(i).getPosition()) <= 6:
                         for i in self.getCapsules(gameState):
-                            if self.getMazeDistance(gameState.getAgentState(self.index).getPosition(), i) <= 3 and self.aStarSearch(gameState, gameState.getAgentState(self.index).getPosition(), [i], self.notGo2(gameState)) is not None:
+                            if self.getMazeDistance(gameState.getAgentState(self.index).getPosition(), i) <= 3 and self.aStarSearch(gameState, gameState.getAgentState(self.index).getPosition(), [i], self.notGo2(gameState)) is not None and self.getMazeDistance(gameState.getAgentState(self.index).getPosition(), i)<self.getMazeDistance(gameState.getAgentState(self.anotherIndex(gameState)).getPosition(), i):
 
                                 return True
           
@@ -842,7 +842,7 @@ class Agent(CaptureAgent):
         Return action to go home or to chase capsule.
         被追去吃药丸或回家
         '''
-        way = self.homeWay(gameState)
+        way = self.homeWay2(gameState)
         # way2=self.eatDots3(gameState)
         # if way2 is not None:
         #     return way2
@@ -1089,7 +1089,7 @@ class Agent(CaptureAgent):
             index = self.getTeam(gameState)[0]
         return index
 
-    def homeWay(self, gameState):
+    def homeWay2(self, gameState):
         '''
         Return a list of actions of shortest way to go back to our side to unload food.
         最近的回家的路
@@ -1119,17 +1119,18 @@ class Agent(CaptureAgent):
                 return []
         return way
 
-    def homeWay2(self, gameState, position):
+    def homeWay(self, gameState):
         '''
         Return a list of actions of shortest way to go back to our side to unload food.
         最近的回家的路
         '''
-        dp = self.notGo2(gameState)
+        dp = self.notGo(gameState)
+        p = gameState.getAgentState(self.index).getPosition()
         line = getMyLine(gameState, self.red)
         way = None
         a = 9999999
         for i in line:
-            path = self.aStarSearch(gameState, position, [i], dp)
+            path = self.aStarSearch(gameState, p, [i], dp)
             if path is not None and len(path) < a:
                 a = len(path)
                 way = path
