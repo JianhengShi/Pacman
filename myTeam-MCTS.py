@@ -789,7 +789,10 @@ def Simulation(node):
             nextGameState = tempGameState.generateSuccessor(node.agent.index,action)
             childNode = Node(nextGameState,node.agent,action,node,node.ghostPos,node.borderline)
             node.child.append(childNode)
-            node = random.choice(node.child)
+            if len(node.child)==0:
+                return node
+            else:
+                node = random.choice(node.child)
     return node
 
 def getFeaturesAttack(agent,node):
