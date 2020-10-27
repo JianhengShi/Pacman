@@ -776,10 +776,21 @@ def MCTS(node):
     timeLimit = 0.5
     start = time.time()
     while(time.time()-start < timeLimit):
-        nodeForSimulation = getExpandedNode(node) #selection and expand
-        reward = getReward(nodeForSimulation)
-        backpropagation(nodeForSimulation,reward)
+        nodeExpanded = getExpandedNode(node) #selection and expand
+        reward = getReward(Simulation(nodeExpanded))
+        backpropagation(nodeExpanded,reward)
     return getBestChild(node).action
+
+def Simulation(node):
+    for i in range(5):
+        if node.unexploredActions != []:
+            action = node.unexploredActions.pop()
+            tempGameState = node.gameState.deepCopy()
+            nextGameState = tempGameState.generateSuccessor(node.agent.index,action)
+            childNode = Node(nextGameState,node.agent,action,node,node.ghostPos,node.borderline)
+            node.child.append(childNode)
+            node = random.choice(node.child)
+    return node
 
 def getFeaturesAttack(agent,node):
     """
